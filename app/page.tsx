@@ -12,10 +12,12 @@ import {
   Sparkles,
   Users,
   WalletCards,
+  X,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState } from "react";
 
 const benefits = [
   {
@@ -39,9 +41,11 @@ const benefits = [
 ];
 
 export default function Page() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
   return (
     <main className="min-h-screen overflow-hidden bg-background text-foreground">
-      <nav className="mx-auto flex max-w-7xl items-center justify-between px-5 py-5 sm:px-8 lg:px-10">
+      <nav className="relative mx-auto flex max-w-7xl items-center justify-between px-5 py-5 sm:px-8 lg:px-10">
         <a
           href="#beranda"
           className="flex items-center gap-2.5"
@@ -93,10 +97,37 @@ export default function Page() {
             size="icon"
             className="md:hidden"
             aria-label="Buka menu"
+            aria-expanded={mobileMenuOpen}
+            onClick={() => setMobileMenuOpen((isOpen) => !isOpen)}
           >
-            <Menu />
+            {mobileMenuOpen ? <X /> : <Menu />}
           </Button>
         </div>
+        {mobileMenuOpen && (
+          <div className="absolute inset-x-5 top-full z-20 flex flex-col gap-1 rounded-2xl border border-border/70 bg-card p-3 shadow-xl md:hidden sm:inset-x-8">
+            <a
+              className="rounded-xl px-3 py-2.5 text-sm font-medium text-muted-foreground hover:bg-secondary hover:text-foreground"
+              href="#tentang"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Tentang kami
+            </a>
+            <a
+              className="rounded-xl px-3 py-2.5 text-sm font-medium text-muted-foreground hover:bg-secondary hover:text-foreground"
+              href="#layanan"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Layanan
+            </a>
+            <a
+              className="rounded-xl px-3 py-2.5 text-sm font-medium text-muted-foreground hover:bg-secondary hover:text-foreground"
+              href="#cerita"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Cerita anggota
+            </a>
+          </div>
+        )}
       </nav>
 
       <section
@@ -191,7 +222,7 @@ export default function Page() {
                 <span>Apr</span>
                 <span>Jul</span>
                 <span>Okt</span>
-                <span>Des 2024</span>
+                <span>Des 2026</span>
               </div>
             </CardContent>
           </Card>
@@ -306,7 +337,7 @@ export default function Page() {
         id="cerita"
         className="mx-auto flex max-w-7xl flex-col gap-4 px-5 pb-8 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between sm:px-8 lg:px-10"
       >
-        <p>© 2024 kopera. Koperasi untuk semua.</p>
+        <p>© 2026 kopera. Koperasi untuk semua.</p>
         <div className="flex gap-5">
           <a href="#tentang" className="hover:text-foreground">
             Tentang

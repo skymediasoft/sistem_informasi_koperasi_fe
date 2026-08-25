@@ -15,6 +15,7 @@ import {
   ShieldCheck,
   UserRound,
   WalletCards,
+  X,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -31,28 +32,28 @@ export default function AnggotaPage() {
     return () => document.removeEventListener("keydown", closeOnEscape);
   }, []);
 
-  useEffect(() => {
-    const menuButton = document.querySelector("header button");
-    const sidebar = document.querySelector("aside");
-    if (!menuButton || !sidebar) return;
-    const toggleSidebar = () => setSidebarOpen((isOpen) => !isOpen);
-    menuButton.addEventListener("click", toggleSidebar);
-    return () => menuButton.removeEventListener("click", toggleSidebar);
-  }, []);
-
-  useEffect(() => {
-    document.querySelector("aside")?.classList.toggle("hidden", !sidebarOpen);
-  }, [sidebarOpen]);
-
   return (
     <main className="min-h-screen bg-muted/40">
-      <aside className="fixed inset-y-0 left-0 hidden w-72 border-r bg-card px-5 py-6 lg:block">
-        <a href="/" className="flex items-center gap-2 px-3 font-semibold">
-          <span className="flex size-9 items-center justify-center rounded-xl bg-primary text-primary-foreground">
-            <Landmark className="size-5" />
-          </span>
-          kopera<span className="text-accent-foreground">.</span>
-        </a>
+      <aside
+        className={`fixed inset-y-0 left-0 z-40 w-72 border-r bg-card px-5 py-6 transition-transform duration-200 lg:translate-x-0 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}
+      >
+        <div className="flex items-center justify-between">
+          <a href="/" className="flex items-center gap-2 px-3 font-semibold">
+            <span className="flex size-9 items-center justify-center rounded-xl bg-primary text-primary-foreground">
+              <Landmark className="size-5" />
+            </span>
+            kopera<span className="text-accent-foreground">.</span>
+          </a>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="lg:hidden"
+            aria-label="Tutup menu"
+            onClick={() => setSidebarOpen(false)}
+          >
+            <X />
+          </Button>
+        </div>
         <div className="mt-10 flex items-center gap-3 rounded-2xl bg-secondary p-3">
           <div className="flex size-10 items-center justify-center rounded-full bg-accent font-bold text-accent-foreground">
             BS
@@ -100,10 +101,24 @@ export default function AnggotaPage() {
           Keluar
         </a>
       </aside>
+      {sidebarOpen && (
+        <button
+          type="button"
+          aria-label="Tutup menu"
+          className="fixed inset-0 z-30 bg-black/30 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
       <div className="lg:pl-72">
         <header className="flex items-center justify-between border-b bg-card px-5 py-4 sm:px-8">
           <div className="flex items-center gap-3">
-            <Button variant="ghost" size="icon" className="lg:hidden">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="lg:hidden"
+              aria-label="Buka menu"
+              onClick={() => setSidebarOpen(true)}
+            >
               <Menu />
             </Button>
             <div>
