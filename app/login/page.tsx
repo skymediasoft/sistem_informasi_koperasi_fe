@@ -99,6 +99,12 @@ function AnggotaLoginForm() {
                 ? "Password Anda masih menggunakan password default. Silakan buat password baru untuk keamanan akun."
                 : "Masuk untuk melihat simpanan, pinjaman, dan aktivitas akun anggota."}
             </p>
+            <p>
+              Jika anda admin koperasi, silakan masuk melalui Portal{" "}
+              <a href="/admin" className="font-semibold text-accent-foreground underline">
+                 Admin
+              </a>
+            </p>
           </CardHeader>
 
           <CardContent className="p-7 pt-3">
