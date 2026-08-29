@@ -77,20 +77,11 @@ export default function Page() {
         </div>
         <div className="flex items-center gap-3">
           <Button
-            variant="ghost"
-            className="hidden sm:inline-flex"
             onClick={() => {
               window.location.href = "/login";
             }}
           >
-            Masuk
-          </Button>
-          <Button
-            onClick={() => {
-              window.location.hash = "daftar";
-            }}
-          >
-            Daftar anggota{" "}
+             Masuk{" "}
           </Button>
           <Button
             variant="ghost"
