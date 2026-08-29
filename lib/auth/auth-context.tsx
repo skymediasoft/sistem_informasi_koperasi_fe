@@ -27,7 +27,7 @@ interface AuthContextType {
   user: AuthSessionUser | null;
   token: string | null;
   loading: boolean;
-  login: (identifier: string, password: string) => Promise<void>;
+  login: (identifier: string, password: string, allowedRoles?: UserRole[]) => Promise<void>;
   changePassword: (newPassword: string) => Promise<void>;
   logout: () => void;
   hasPermission: (permissionName: string) => boolean;
@@ -92,7 +92,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const login = useCallback(
-    async (identifier: string, password: string) => {
+    async (identifier: string, password: string, allowedRoles?: UserRole[]) => {
       setLoading(true);
 
       try {
@@ -104,6 +104,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const matchedUser = resolveUserByCredentials(normalizedIdentifier, password);
         if (!matchedUser) {
           throw new Error("User atau password tidak cocok dengan data authorization.");
+        }
+
+        if (allowedRoles && !allowedRoles.includes(matchedUser.role)) {
+          throw new Error(
+            allowedRoles.includes("anggota")
+              ? "Halaman ini khusus login anggota. Gunakan /admin untuk akun pengurus."
+              : "Halaman ini khusus login admin dan pengurus. Gunakan /login untuk akun anggota.",
+          );
         }
 
         const role = matchedUser.role as UserRole;

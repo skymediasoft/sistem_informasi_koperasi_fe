@@ -11,19 +11,19 @@ import { useAuth } from "@/lib/auth/auth-context";
 import { DEFAULT_PASSWORD } from "@/lib/auth/navigation";
 
 //pw: koperasi123
-export default function AnggotaLoginPage() {
+export default function AdminLoginPage() {
   return (
     <Suspense fallback={<div className="flex min-h-screen items-center justify-center">Memuat halaman login...</div>}>
-      <AnggotaLoginForm />
+      <AdminLoginForm />
     </Suspense>
   );
 }
 
-function AnggotaLoginForm() {
+function AdminLoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { login, user, changePassword } = useAuth();
-  const [identifier, setIdentifier] = useState("KPR-2024-001");
+  const [identifier, setIdentifier] = useState("administrator@kopera.id");
   const [password, setPassword] = useState(DEFAULT_PASSWORD);
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -44,7 +44,7 @@ function AnggotaLoginForm() {
 
     try {
       setIsSubmitting(true);
-      await login(identifier, password, ["anggota"]);
+      await login(identifier, password, ["administrator", "admin-koperasi", "pengurus-koperasi"]);
     } catch (err: any) {
       setError(err.message || "Login gagal, periksa kembali identitas dan password Anda.");
     } finally {
@@ -89,7 +89,7 @@ function AnggotaLoginForm() {
         <Card className="rounded-3xl border-border/70 shadow-xl shadow-primary/5">
           <CardHeader className="gap-3 p-7 pb-4">
             <Badge variant="secondary" className="w-fit rounded-full">
-              {shouldChangePassword ? "Keamanan akun anggota" : "Portal anggota"}
+              {shouldChangePassword ? "Keamanan akun admin" : "Portal admin koperasi"}
             </Badge>
             <CardTitle className="text-3xl tracking-tight">
               {shouldChangePassword ? "Ubah password awal" : "Selamat datang kembali"}
@@ -97,7 +97,7 @@ function AnggotaLoginForm() {
             <p className="text-sm leading-6 text-muted-foreground">
               {shouldChangePassword
                 ? "Password Anda masih menggunakan password default. Silakan buat password baru untuk keamanan akun."
-                : "Masuk untuk melihat simpanan, pinjaman, dan aktivitas akun anggota."}
+                : "Masuk untuk mengelola data, transaksi, dan laporan koperasi."}
             </p>
           </CardHeader>
 
@@ -149,7 +149,7 @@ function AnggotaLoginForm() {
                   <Input
                     value={identifier}
                     onChange={(event) => setIdentifier(event.target.value)}
-                    placeholder="KPR-2024-001"
+                    placeholder="administrator@kopera.id / admin@kopera.id / pengurus@kopera.id"
                   />
                 </label>
 
