@@ -9,6 +9,12 @@ const geistMono = Geist_Mono({ subsets: ["latin"], variable: "--font-geist-mono"
 export const metadata: Metadata = {
   title: "kopera — Koperasi untuk semua",
   description: "Simpan, tumbuh, dan berdampak bersama koperasi",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "kopera",
+  },
 };
 
 export const viewport: Viewport = {

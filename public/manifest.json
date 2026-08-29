@@ -1,0 +1,25 @@
+{
+  "name": "kopera — Koperasi untuk semua",
+  "short_name": "kopera",
+  "description": "Simpan, tumbuh, dan berdampak bersama koperasi",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f8f8f1",
+  "theme_color": "#f8f8f1",
+  "orientation": "portrait",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/placeholder-logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/placeholder-logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -201,6 +201,14 @@ export const roleLandingPage: Record<UserRole, string> = {
   anggota: "/dashboard",
 };
 
+
+
+
+
+//masterdata id .... name ... 
+
+
+
 export const roleMenus: Record<UserRole, MenuItem[]> = {
   administrator: [
     {
@@ -218,6 +226,7 @@ export const roleMenus: Record<UserRole, MenuItem[]> = {
         { label: "Department", href: "/master-data/department" },
         { label: "Anggota Jasa", href: "/master-data/anggota" },
         { label: "Anggota", href: "/master-data/anggota" },
+        { label: "Verifikasi Anggota", href: "/master-data/anggota" },
       ],
     },
     {
