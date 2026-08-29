@@ -17,7 +17,15 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+
+const INSTALL_DISMISSED_KEY = "kopera-pwa-install-dismissed";
+const INSTALL_COMPLETED_KEY = "kopera-pwa-installed";
+
+type BeforeInstallPromptEvent = Event & {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: "accepted" | "dismissed"; platform: string }>;
+};
 
 const benefits = [
   {
@@ -42,6 +50,63 @@ const benefits = [
 
 export default function Page() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+  const [showInstallPrompt, setShowInstallPrompt] = useState(false);
+
+  useEffect(() => {
+    const isStandalone =
+      window.matchMedia("(display-mode: standalone)").matches ||
+      Boolean((window.navigator as Navigator & { standalone?: boolean }).standalone);
+
+    const hasInstalled = window.localStorage.getItem(INSTALL_COMPLETED_KEY) === "1";
+    const hasDismissed = window.localStorage.getItem(INSTALL_DISMISSED_KEY) === "1";
+
+    if (isStandalone || hasInstalled || hasDismissed) {
+      setShowInstallPrompt(false);
+      return;
+    }
+
+    const handleBeforeInstallPrompt = (event: Event) => {
+      event.preventDefault();
+      setDeferredPrompt(event as BeforeInstallPromptEvent);
+      setShowInstallPrompt(true);
+    };
+
+    const handleAppInstalled = () => {
+      window.localStorage.setItem(INSTALL_COMPLETED_KEY, "1");
+      setDeferredPrompt(null);
+      setShowInstallPrompt(false);
+    };
+
+    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+    window.addEventListener("appinstalled", handleAppInstalled);
+
+    return () => {
+      window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+      window.removeEventListener("appinstalled", handleAppInstalled);
+    };
+  }, []);
+
+  const handleInstall = async () => {
+    if (!deferredPrompt) {
+      return;
+    }
+
+    await deferredPrompt.prompt();
+    const choice = await deferredPrompt.userChoice;
+
+    if (choice.outcome === "accepted") {
+      window.localStorage.setItem(INSTALL_COMPLETED_KEY, "1");
+    }
+
+    setDeferredPrompt(null);
+    setShowInstallPrompt(false);
+  };
+
+  const handleDismissInstall = () => {
+    window.localStorage.setItem(INSTALL_DISMISSED_KEY, "1");
+    setShowInstallPrompt(false);
+  };
 
   return (
     <main className="min-h-screen overflow-hidden bg-background text-foreground">
@@ -341,6 +406,38 @@ export default function Page() {
           </a>
         </div>
       </footer>
+
+      {showInstallPrompt && (
+        <div className="fixed bottom-4 right-4 z-50 md:hidden">
+          <div className="flex w-[min(88vw,300px)] items-center gap-3 rounded-2xl border border-border/70 bg-card p-3 shadow-2xl shadow-black/10">
+            <button
+              type="button"
+              aria-label="Tutup install PWA"
+              onClick={handleDismissInstall}
+              className="flex size-8 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground transition hover:bg-muted/80 hover:text-foreground"
+            >
+              <X className="size-4" />
+            </button>
+
+            <div className="min-w-0 flex-1">
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                Install app
+              </p>
+              <p className="mt-1 text-sm font-medium text-foreground">
+                Tambahkan Kopera ke layar utama
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={handleInstall}
+              className="inline-flex shrink-0 items-center justify-center rounded-xl bg-primary px-3 py-2 text-xs font-semibold text-primary-foreground transition hover:opacity-90"
+            >
+              Install
+            </button>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
