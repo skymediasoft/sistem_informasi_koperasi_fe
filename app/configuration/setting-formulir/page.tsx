@@ -2,13 +2,13 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { CircleDollarSign, HandCoins, ShieldCheck } from "lucide-react";
+import { FileCog, Settings2, SlidersHorizontal } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DashboardShell } from "@/components/dashboard/app-shell";
 import { useAuth } from "@/lib/auth/auth-context";
 import { getMenuByRole, getSessionFromStorage, secondaryMenu } from "@/lib/auth/navigation";
 
-export default function PinjamanKreditPage() {
+export default function SettingFormulirPage() {
   const router = useRouter();
   const { logout, user } = useAuth();
 
@@ -24,33 +24,34 @@ export default function PinjamanKreditPage() {
 
   return (
     <DashboardShell
-      title="Pinjaman & Kredit"
-      subtitle="Pengajuan dan pembayaran"
+      title="Configuration"
+      subtitle="Setting utama aplikasi koperasi"
       displayName={displayName}
       groupName={user?.groupName || "Koperasi"}
       initials={initials}
       menu={menu}
       secondaryMenu={secondaryMenu}
       onLogout={logout}
-      actionLabel="Ajukan kredit"
+      actionLabel="Simpan config"
       onAction={() => undefined}
     >
       <div className="grid gap-4 md:grid-cols-3">
-        <MetricCard icon={CircleDollarSign} label="Pinjaman aktif" value="Rp 11.800.000" />
-        <MetricCard icon={HandCoins} label="Angsuran bulan ini" value="Rp 2.300.000" />
-        <MetricCard icon={ShieldCheck} label="Tertunggak" value="2 anggota" />
+        <MetricCard icon={Settings2} label="Simpanan" value="Aktif" />
+        <MetricCard icon={SlidersHorizontal} label="Pinjaman" value="Aktif" />
+        <MetricCard icon={FileCog} label="Formulir" value="11 template" />
       </div>
 
       <div className="mt-6 grid gap-6 xl:grid-cols-2">
         <Card className="rounded-2xl">
           <CardHeader>
-            <CardTitle>Pengajuan masuk</CardTitle>
+            <CardTitle>Konfigurasi umum</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3 text-sm text-muted-foreground">
             {[
-              "KPR-2024-005 - Kredit modal usaha - Rp 12.000.000",
-              "KPR-2024-013 - Kredit kebutuhan keluarga - Rp 8.500.000",
-              "KPR-2024-019 - Kredit konsumtif - Rp 6.200.000",
+              "Setting simpanan wajib",
+              "Setting pinjaman & kredit",
+              "Setting jenis jasa",
+              "Setting formulir dokumen",
             ].map((item) => (
               <div key={item} className="rounded-xl bg-secondary p-3">
                 {item}
@@ -61,13 +62,14 @@ export default function PinjamanKreditPage() {
 
         <Card className="rounded-2xl">
           <CardHeader>
-            <CardTitle>Jadwal angsuran</CardTitle>
+            <CardTitle>Daftar status</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3 text-sm text-muted-foreground">
             {[
-              "05 Agustus - Cicilan ke-4",
-              "12 Agustus - Autodebet payroll",
-              "19 Agustus - Pembayaran tunai",
+              "Simpanan aktif",
+              "Pinjaman aktif",
+              "Jasa aktif",
+              "Formulir siap dipakai",
             ].map((item) => (
               <div key={item} className="rounded-xl bg-secondary p-3">
                 {item}

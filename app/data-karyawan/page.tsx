@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { BarChart3, BriefcaseBusiness, FileBarChart2, ReceiptText, ShieldCheck } from "lucide-react";
+import { Building2, Database, FileCog, ShieldCheck, Users, WalletCards } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,7 +9,7 @@ import { DashboardShell } from "@/components/dashboard/app-shell";
 import { useAuth } from "@/lib/auth/auth-context";
 import { getMenuByRole, getSessionFromStorage, secondaryMenu } from "@/lib/auth/navigation";
 
-export default function ReportPage() {
+export default function MasterDataPage() {
   const router = useRouter();
   const { logout, user } = useAuth();
 
@@ -25,40 +25,39 @@ export default function ReportPage() {
 
   return (
     <DashboardShell
-      title="Report"
-      subtitle="Laporan simpanan, pinjaman, payroll, dan SHU"
+      title="Master Data"
+      subtitle="Configuration & data master"
       displayName={displayName}
       groupName={user?.groupName || "Koperasi"}
       initials={initials}
       menu={menu}
       secondaryMenu={secondaryMenu}
       onLogout={logout}
-      actionLabel="Export laporan"
-      onAction={() => (window.location.hash = "#laporan")}
+      actionLabel="Tambah data"
+      onAction={() => (window.location.hash = "#configuration")}
     >
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <Stat title="Laporan aktif" value="42" trend="Terbaru hari ini" icon={BarChart3} />
-        <Stat title="Pinjaman" value="Rp 14,2 M" trend="Data detail" icon={BriefcaseBusiness} />
-        <Stat title="Profit" value="Rp 2,4 M" trend="Kinerja bulan ini" icon={ReceiptText} />
-        <Stat title="Validasi" value="96%" trend="Sudah dicek" icon={ShieldCheck} good />
+        <Stat title="Departemen" value="18" trend="3 baru bulan ini" icon={Building2} />
+        <Stat title="Anggota" value="9.240" trend="+124 anggota aktif" icon={Users} />
+        <Stat title="Configuration" value="26" trend="4 setting utama" icon={FileCog} />
+        <Stat title="Data valid" value="98,4%" trend="Aman" icon={ShieldCheck} good />
       </div>
 
       <div className="mt-6 grid gap-6 xl:grid-cols-2">
         <Card className="rounded-2xl">
           <CardHeader>
-            <CardTitle>Simpanan & Anggota</CardTitle>
+            <CardTitle>Configuration</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3 text-sm text-muted-foreground">
             {[
-              "Laporan Simpanan",
-              "Summary Simpanan Anggota",
-              "Mutasi Simpanan Anggota",
-              "Laporan Anggota",
-              "Laporan Data Anggota",
+              "Setting Simpanan",
+              "Setting Pinjaman/Kredit",
+              "Setting Jenis Jasa",
+              "Setting Formulir",
             ].map((item) => (
               <div key={item} className="flex items-center justify-between rounded-xl bg-secondary p-3">
                 <span>{item}</span>
-                <Badge variant="secondary">Draft</Badge>
+                <Badge variant="secondary">Aktif</Badge>
               </div>
             ))}
           </CardContent>
@@ -66,20 +65,17 @@ export default function ReportPage() {
 
         <Card className="rounded-2xl">
           <CardHeader>
-            <CardTitle>Pinjaman & SHU</CardTitle>
+            <CardTitle>Data Master</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3 text-sm text-muted-foreground">
             {[
-              "Laporan Pinjaman/Kredit",
-              "Pembayaran Detail",
-              "Profit Lunas",
-              "Profit Berjalan",
-              "Laporan SHU",
-              "Pembagian SHU",
+              "Departemen",
+              "Anggota Jasa",
+              "Anggota",
             ].map((item) => (
               <div key={item} className="flex items-center justify-between rounded-xl bg-secondary p-3">
                 <span>{item}</span>
-                <Badge variant="outline">Ready</Badge>
+                <Badge variant="outline">Terdata</Badge>
               </div>
             ))}
           </CardContent>
@@ -87,9 +83,9 @@ export default function ReportPage() {
       </div>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-3">
-        <QuickCard title="Payroll" desc="Tagihan dan potongan payroll per bulan" icon={FileBarChart2} />
-        <QuickCard title="Jasa" desc="Monitoring pembayaran listrik, air, dan telepon" icon={BarChart3} />
-        <QuickCard title="Kredit Waserda" desc="Data tagihan dan profit pada kredit waserda" icon={ReceiptText} />
+        <QuickCard title="Master data utama" desc="Data organisasi dan pengaturan operasional" icon={Database} />
+        <QuickCard title="Pemeliharaan" desc="Validasi konfigurasi untuk seluruh menu transaksi" icon={WalletCards} />
+        <QuickCard title="Keamanan" desc="Akses data anggota dan setting sistem terkontrol" icon={ShieldCheck} />
       </div>
     </DashboardShell>
   );

@@ -1,8 +1,10 @@
 import { defaultCache } from "@serwist/next/worker";
 import { Serwist } from "serwist";
 
+type PrecacheEntry = string | { url: string; revision?: string | null };
+
 declare const self: ServiceWorkerGlobalScope & {
-  __SW_MANIFEST: (string | PrecacheEntry)[] | undefined;
+  __SW_MANIFEST: PrecacheEntry[] | undefined;
 };
 
 const serwist = new Serwist({

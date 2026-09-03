@@ -2,13 +2,13 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Building2, ClipboardList, Users } from "lucide-react";
+import { FileCog, Settings2, SlidersHorizontal } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DashboardShell } from "@/components/dashboard/app-shell";
 import { useAuth } from "@/lib/auth/auth-context";
 import { getMenuByRole, getSessionFromStorage, secondaryMenu } from "@/lib/auth/navigation";
 
-export default function DepartmentPage() {
+export default function SettingJenisJasaPage() {
   const router = useRouter();
   const { logout, user } = useAuth();
 
@@ -24,33 +24,34 @@ export default function DepartmentPage() {
 
   return (
     <DashboardShell
-      title="Department"
-      subtitle="Unit kerja koperasi"
+      title="Configuration"
+      subtitle="Setting utama aplikasi koperasi"
       displayName={displayName}
       groupName={user?.groupName || "Koperasi"}
       initials={initials}
       menu={menu}
       secondaryMenu={secondaryMenu}
       onLogout={logout}
-      actionLabel="Tambah unit"
+      actionLabel="Simpan config"
       onAction={() => undefined}
     >
       <div className="grid gap-4 md:grid-cols-3">
-        <MetricCard icon={Building2} label="Unit aktif" value="18" />
-        <MetricCard icon={Users} label="Pegawai" value="220" />
-        <MetricCard icon={ClipboardList} label="Proses" value="7" />
+        <MetricCard icon={Settings2} label="Simpanan" value="Aktif" />
+        <MetricCard icon={SlidersHorizontal} label="Pinjaman" value="Aktif" />
+        <MetricCard icon={FileCog} label="Formulir" value="11 template" />
       </div>
 
       <div className="mt-6 grid gap-6 xl:grid-cols-2">
         <Card className="rounded-2xl">
           <CardHeader>
-            <CardTitle>Daftar unit</CardTitle>
+            <CardTitle>Konfigurasi umum</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3 text-sm text-muted-foreground">
             {[
-              "Keuangan - 32 pegawai",
-              "Simpanan & Pinjaman - 48 pegawai",
-              "Anggota & Pelayanan - 58 pegawai",
+              "Setting simpanan wajib",
+              "Setting pinjaman & kredit",
+              "Setting jenis jasa",
+              "Setting formulir dokumen",
             ].map((item) => (
               <div key={item} className="rounded-xl bg-secondary p-3">
                 {item}
@@ -61,13 +62,14 @@ export default function DepartmentPage() {
 
         <Card className="rounded-2xl">
           <CardHeader>
-            <CardTitle>Catatan perubahan</CardTitle>
+            <CardTitle>Daftar status</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3 text-sm text-muted-foreground">
             {[
-              "Tim pelayanan ditambah 2 orang",
-              "Unit audit mobile dibentuk bulan lalu",
-              "Department keuangan perlu review struktur",
+              "Simpanan aktif",
+              "Pinjaman aktif",
+              "Jasa aktif",
+              "Formulir siap dipakai",
             ].map((item) => (
               <div key={item} className="rounded-xl bg-secondary p-3">
                 {item}

@@ -8,9 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/lib/auth/auth-context";
-import { DEFAULT_PASSWORD } from "@/lib/auth/navigation";
 
-//pw: koperasi123
 export default function AdminLoginPage() {
   return (
     <Suspense fallback={<div className="flex min-h-screen items-center justify-center">Memuat halaman login...</div>}>
@@ -23,8 +21,8 @@ function AdminLoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { login, user, changePassword } = useAuth();
-  const [identifier, setIdentifier] = useState("administrator@kopera.id");
-  const [password, setPassword] = useState(DEFAULT_PASSWORD);
+  const [identifier, setIdentifier] = useState("");
+  const [password, setPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
@@ -167,10 +165,6 @@ function AdminLoginForm() {
                   </div>
                 </label>
 
-                <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
-                  Password default: <strong>{DEFAULT_PASSWORD}</strong>
-                </div>
-
                 {error ? (
                   <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
                     {error}
@@ -185,7 +179,7 @@ function AdminLoginForm() {
 
             <div className="mt-6 flex items-center justify-center gap-2 text-xs text-muted-foreground">
               <ShieldCheck className="size-4 text-accent-foreground" />
-              {shouldChangePassword ? "Password default hanya berlaku saat registrasi awal" : "Password default berlaku untuk pendaftaran awal"}
+              Gunakan username dan password yang valid dari sistem koperasi.
             </div>
           </CardContent>
         </Card>

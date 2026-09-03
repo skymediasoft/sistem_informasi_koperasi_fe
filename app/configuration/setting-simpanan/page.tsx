@@ -2,13 +2,13 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { FileCheck2, ReceiptText, Sparkles } from "lucide-react";
+import { FileCog, Settings2, SlidersHorizontal } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DashboardShell } from "@/components/dashboard/app-shell";
 import { useAuth } from "@/lib/auth/auth-context";
 import { getMenuByRole, getSessionFromStorage, secondaryMenu } from "@/lib/auth/navigation";
 
-export default function JasaPage() {
+export default function SettingSimpananPage() {
   const router = useRouter();
   const { logout, user } = useAuth();
 
@@ -24,34 +24,34 @@ export default function JasaPage() {
 
   return (
     <DashboardShell
-      title="Jasa"
-      subtitle="Tagihan jasa dan pembagian manfaat"
+      title="Configuration"
+      subtitle="Setting utama aplikasi koperasi"
       displayName={displayName}
       groupName={user?.groupName || "Koperasi"}
       initials={initials}
       menu={menu}
       secondaryMenu={secondaryMenu}
       onLogout={logout}
-      actionLabel="Posting jasa"
+      actionLabel="Simpan config"
       onAction={() => undefined}
     >
       <div className="grid gap-4 md:grid-cols-3">
-        <MetricCard icon={ReceiptText} label="Tagihan listrik" value="Rp 680.000" />
-        <MetricCard icon={FileCheck2} label="Tagihan air" value="Rp 410.000" />
-        <MetricCard icon={Sparkles} label="Jasa total" value="Rp 1.470.000" />
+        <MetricCard icon={Settings2} label="Simpanan" value="Aktif" />
+        <MetricCard icon={SlidersHorizontal} label="Pinjaman" value="Aktif" />
+        <MetricCard icon={FileCog} label="Formulir" value="11 template" />
       </div>
 
       <div className="mt-6 grid gap-6 xl:grid-cols-2">
         <Card className="rounded-2xl">
           <CardHeader>
-            <CardTitle>Tagihan jasa</CardTitle>
+            <CardTitle>Konfigurasi umum</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3 text-sm text-muted-foreground">
             {[
-              "Listrik - 27 anggota",
-              "Air - 19 anggota",
-              "Sembako - 12 anggota",
-              "Waserda - 8 anggota",
+              "Setting simpanan wajib",
+              "Setting pinjaman & kredit",
+              "Setting jenis jasa",
+              "Setting formulir dokumen",
             ].map((item) => (
               <div key={item} className="rounded-xl bg-secondary p-3">
                 {item}
@@ -62,13 +62,14 @@ export default function JasaPage() {
 
         <Card className="rounded-2xl">
           <CardHeader>
-            <CardTitle>Posting terbaru</CardTitle>
+            <CardTitle>Daftar status</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3 text-sm text-muted-foreground">
             {[
-              "Tagihan listrik bulan ini telah diposting",
-              "Jasa air sedang menunggu validasi",
-              "Profit sembako berhasil dihitung",
+              "Simpanan aktif",
+              "Pinjaman aktif",
+              "Jasa aktif",
+              "Formulir siap dipakai",
             ].map((item) => (
               <div key={item} className="rounded-xl bg-secondary p-3">
                 {item}
