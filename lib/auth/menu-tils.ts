@@ -60,8 +60,8 @@ export const normalizeMenuRoute = (
  * Backend cukup mengirim:
  *
  * {
- *   menuName: "Master Data",
- *   route: "/master-data"
+ *   menuName: "Data Karyawan",
+ *   route: "/data-karyawan"
  * }
  *
  * Frontend otomatis memilih icon.

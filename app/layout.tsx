@@ -8,16 +8,16 @@ import { DashboardLayout } from "@/components/dashboard/dashboard-layout";
 const geist = Geist({ subsets: ["latin"], variable: "--font-geist-sans" });
 const geistMono = Geist_Mono({ subsets: ["latin"], variable: "--font-geist-mono" });
 
-// export const metadata: Metadata = {
-//   title: "kopera — Koperasi untuk semua",
-//   description: "Simpan, tumbuh, dan berdampak bersama koperasi",
-//   manifest: "/manifest.json",
-//   appleWebApp: {
-//     capable: true,
-//     statusBarStyle: "default",
-//     title: "kopera",
-//   },
-// };
+export const metadata: Metadata = {
+  title: "kopera — Koperasi untuk semua",
+  description: "Simpan, tumbuh, dan berdampak bersama koperasi",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "kopera",
+  },
+};
 
 export const viewport: Viewport = {
   colorScheme: "light",

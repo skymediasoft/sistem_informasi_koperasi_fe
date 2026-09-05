@@ -44,6 +44,9 @@ dependencies:
   shadcn:
     specifier: ^4.19.0
     version: 4.19.0(typescript@5.7.3)
+  sweetalert2:
+    specifier: ^11.26.25
+    version: 11.26.25
   tailwind-merge:
     specifier: ^3.3.1
     version: 3.6.0
@@ -3359,6 +3362,10 @@ packages:
       '@babel/core': 7.29.7
       client-only: 0.0.1
       react: 19.2.8
+    dev: false
+
+  /sweetalert2@11.26.25:
+    resolution: {integrity: sha512-+hunCOJdJ6FLj04T9YSLvvZXRjsvIkTeTKP2e4VF8CaBias961BTnWiSFAy7F/CM5eq3QK2Rraoc5Gzftslvkg==}
     dev: false
 
   /systeminformation@5.33.2:

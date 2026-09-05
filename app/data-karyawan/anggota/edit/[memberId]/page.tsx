@@ -60,7 +60,7 @@ export default function EditAnggotaPage() {
 
   const handleSubmit = (values: MemberFormValues) => {
     console.log("Update anggota", values);
-    router.push("/master-data/anggota");
+    router.push("/data-karyawan/anggota");
   };
 
   return (
@@ -74,7 +74,7 @@ export default function EditAnggotaPage() {
       secondaryMenu={secondaryMenu}
       onLogout={logout}
       actionLabel="Kembali"
-      onAction={() => router.push("/master-data/anggota")}
+      onAction={() => router.push("/data-karyawan/anggota")}
     >
       <div className="mx-auto max-w-4xl">
         <div className="mb-5 flex items-center gap-3 rounded-2xl bg-accent/10 p-4 text-accent-foreground">
@@ -86,7 +86,7 @@ export default function EditAnggotaPage() {
           mode="edit"
           initialValues={selectedMember}
           onSubmit={handleSubmit}
-          onCancel={() => router.push("/master-data/anggota")}
+          onCancel={() => router.push("/data-karyawan/anggota")}
         />
       </div>
     </DashboardShell>

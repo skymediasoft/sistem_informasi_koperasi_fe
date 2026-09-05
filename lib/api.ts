@@ -31,8 +31,35 @@ api.interceptors.response.use(
   },
 );
 
-const handleResponse = async <T>(promise: Promise<any>): Promise<T> => {
+export const handleResponse = async <T>(promise: Promise<any>): Promise<T> => {
   const { data } = await promise;
   if (data.success === false) throw new Error(data.message || "Server error");
   return data.data ?? data;
+};
+
+export type Department = {
+  departmentId: string;
+  departmentName: string;
+  departmentCreatedUser: string;
+  departmentCreateDate?: string | number;
+};
+
+export type CreateDepartmentPayload = {
+  departmentId: string;
+  departmentName: string;
+};
+
+export type UpdateDepartmentPayload = {
+  departmentName: string;
+};
+
+export const departmentApi = {
+  findAll: () => handleResponse<Department[]>(api.get("/department")),
+  findOne: (departmentId: string) =>
+    handleResponse<Department>(api.get(`/department/${departmentId}`)),
+  create: (department: CreateDepartmentPayload) =>
+    handleResponse<Department>(api.post("/department/create", department)),
+  update: (departmentId: string, department: UpdateDepartmentPayload) =>
+    handleResponse<{ message: string }>(api.patch(`/department/${departmentId}`, department)),
+  delete: (departmentId: string) => handleResponse<void>(api.delete(`/department/${departmentId}`)),
 };

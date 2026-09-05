@@ -42,7 +42,7 @@ export default function AnggotaPage() {
       </div>
 
       <div className="mt-6 grid gap-6 xl:grid-cols-2">
-        <Card className="rounded-2xl">
+        <Card className="rounded-2xl px-4 py-2">
           <CardHeader>
             <CardTitle>Daftar anggota</CardTitle>
           </CardHeader>
@@ -59,7 +59,7 @@ export default function AnggotaPage() {
           </CardContent>
         </Card>
 
-        <Card className="rounded-2xl">
+        <Card className="rounded-2xl px-4 py-2">
           <CardHeader>
             <CardTitle>Verifikasi akun</CardTitle>
           </CardHeader>

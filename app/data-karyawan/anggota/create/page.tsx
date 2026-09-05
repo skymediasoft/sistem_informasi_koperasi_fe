@@ -19,7 +19,7 @@ export default function CreateAnggotaPage() {
 
   const handleSubmit = (values: MemberFormValues) => {
     console.log("Create anggota", values);
-    router.push("/master-data/anggota");
+    router.push("/data-karyawan/anggota");
   };
 
   return (
@@ -33,7 +33,7 @@ export default function CreateAnggotaPage() {
       secondaryMenu={secondaryMenu}
       onLogout={logout}
       actionLabel="Kembali"
-      onAction={() => router.push("/master-data/anggota")}
+      onAction={() => router.push("/data-karyawan/anggota")}
     >
       <div className="mx-auto max-w-4xl">
         <div className="mb-5 flex items-center gap-3 rounded-2xl bg-primary/5 p-4 text-primary">
@@ -41,7 +41,7 @@ export default function CreateAnggotaPage() {
           <span className="font-medium">Isi data anggota baru dengan lengkap.</span>
         </div>
 
-        <MemberForm mode="create" onSubmit={handleSubmit} onCancel={() => router.push("/master-data/anggota")} />
+        <MemberForm mode="create" onSubmit={handleSubmit} onCancel={() => router.push("/data-karyawan/anggota")} />
       </div>
     </DashboardShell>
   );

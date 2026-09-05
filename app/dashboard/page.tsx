@@ -148,7 +148,7 @@ export default function DashboardPage() {
 
       <div className="mt-6 grid gap-6 xl:grid-cols-[1.5fr_1fr]">
         <Card className="rounded-2xl">
-          <CardHeader className="flex-row items-center justify-between">
+          <CardHeader className="flex-row px-4 py-2 items-center justify-between">
             <div>
               <CardTitle>
                 Indikator kesehatan koperasi
@@ -169,7 +169,7 @@ export default function DashboardPage() {
           </CardHeader>
 
           <CardContent>
-            <div className="grid gap-6 sm:grid-cols-3">
+            <div className="grid gap-6 px-4 sm:grid-cols-3">
               <Health
                 label="Likuiditas"
                 value="84"
@@ -189,7 +189,7 @@ export default function DashboardPage() {
               />
             </div>
 
-            <div className="mt-7 flex h-40 items-end gap-2 border-b border-border/70">
+            <div className="mt-7 px-4 flex h-40 items-end gap-2 border-b border-border/70">
               {[
                 42,
                 52,
@@ -218,7 +218,7 @@ export default function DashboardPage() {
               ))}
             </div>
 
-            <div className="mt-3 flex justify-between text-xs text-muted-foreground">
+            <div className="mt-3 px-12 pb-3 flex justify-between text-xs text-muted-foreground">
               <span>Sep</span>
               <span>Nov</span>
               <span>Jan</span>
@@ -227,7 +227,7 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
-        <Card className="rounded-2xl">
+        <Card className="rounded-2xl px-4 py-2">
           <CardHeader>
             <CardTitle>
               Aktivitas terbaru

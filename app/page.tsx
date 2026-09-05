@@ -245,10 +245,10 @@ export default function Page() {
             <CardHeader className="border-b border-border/70 pb-5">
               <div className="flex items-start justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm px-4 py-2 text-muted-foreground">
                     Saldo simpanan bersama
                   </p>
-                  <CardTitle className="mt-2 text-3xl tracking-tight">
+                  <CardTitle className="mt-2 px-4 text-3xl tracking-tight">
                     Rp 2.480.000
                   </CardTitle>
                 </div>
@@ -256,7 +256,7 @@ export default function Page() {
                   <ShieldCheck className="size-5" />
                 </div>
               </div>
-              <div className="mt-4 flex items-center gap-2 text-sm text-accent-foreground">
+              <div className="mt-4 px-3 pb-3 flex items-center gap-2 text-sm text-accent-foreground">
                 <span className="rounded-full bg-accent px-2 py-1 font-medium">
                   +12,8%
                 </span>

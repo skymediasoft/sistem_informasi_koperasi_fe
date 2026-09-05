@@ -56,8 +56,8 @@ export default function AnggotaPage() {
     []
   );
 
-  const handleCreate = () => router.push("/master-data/anggota/create");
-  const handleEdit = (row: AnggotaRow) => router.push(`/master-data/anggota/edit/${row.memberId}`);
+  const handleCreate = () => router.push("/data-karyawan/anggota/create");
+  const handleEdit = (row: AnggotaRow) => router.push(`/data-karyawan/anggota/edit/${row.memberId}`);
   const handleDelete = (row: AnggotaRow) => console.log("Delete anggota", row.memberId);
 
   return (

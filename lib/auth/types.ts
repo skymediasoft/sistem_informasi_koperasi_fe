@@ -175,9 +175,7 @@ export interface MeResponse {
 
   id?: number | string;
   userlogin?: string;
-  userLogin?: string;
 
-  username?: string;
   userName?: string;
   name?: string;
 

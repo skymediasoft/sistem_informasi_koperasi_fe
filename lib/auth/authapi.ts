@@ -14,6 +14,8 @@ export const authApi = {
       headers: buildHeaders(),
       withCredentials: false,
     });
+
+    console.log("authApi.login response:", res.data); // Log the response data for debugging
     return res.data;
   },
 
@@ -22,8 +24,10 @@ export const authApi = {
       headers: buildHeaders(token),
       withCredentials: false,
     });
-
+    console.log("authApi.me response:", res.data); // Log the response data for debugging
     return res.data;
+    
+
   },
 
   refreshToken: async (refreshToken: string) => {
