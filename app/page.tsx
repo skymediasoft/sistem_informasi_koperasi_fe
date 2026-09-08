@@ -5,6 +5,7 @@ import {
   Check,
   ChevronRight,
   HandCoins,
+  HandCoinsIcon,
   HeartHandshake,
   Landmark,
   Menu,
@@ -35,7 +36,7 @@ const benefits = [
       "Simpanan anggota dikelola transparan untuk menguatkan ekonomi bersama.",
   },
   {
-    icon: HandCoins,
+    icon: HandCoinsIcon,
     title: "Pinjaman lebih manusiawi",
     description:
       "Ajukan kebutuhan produktif dengan proses yang sederhana dan bunga bersahabat.",
@@ -50,16 +51,21 @@ const benefits = [
 
 export default function Page() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+  const [deferredPrompt, setDeferredPrompt] =
+    useState<BeforeInstallPromptEvent | null>(null);
   const [showInstallPrompt, setShowInstallPrompt] = useState(false);
 
   useEffect(() => {
     const isStandalone =
       window.matchMedia("(display-mode: standalone)").matches ||
-      Boolean((window.navigator as Navigator & { standalone?: boolean }).standalone);
+      Boolean(
+        (window.navigator as Navigator & { standalone?: boolean }).standalone,
+      );
 
-    const hasInstalled = window.localStorage.getItem(INSTALL_COMPLETED_KEY) === "1";
-    const hasDismissed = window.localStorage.getItem(INSTALL_DISMISSED_KEY) === "1";
+    const hasInstalled =
+      window.localStorage.getItem(INSTALL_COMPLETED_KEY) === "1";
+    const hasDismissed =
+      window.localStorage.getItem(INSTALL_DISMISSED_KEY) === "1";
 
     if (isStandalone || hasInstalled || hasDismissed) {
       setShowInstallPrompt(false);
@@ -82,7 +88,10 @@ export default function Page() {
     window.addEventListener("appinstalled", handleAppInstalled);
 
     return () => {
-      window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+      window.removeEventListener(
+        "beforeinstallprompt",
+        handleBeforeInstallPrompt,
+      );
       window.removeEventListener("appinstalled", handleAppInstalled);
     };
   }, []);
@@ -146,7 +155,7 @@ export default function Page() {
               window.location.href = "/login";
             }}
           >
-             Masuk{" "}
+            Masuk{" "}
           </Button>
           <Button
             variant="ghost"

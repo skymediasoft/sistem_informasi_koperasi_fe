@@ -24,6 +24,8 @@ const formatTanggal = (timestamp: number) =>
         day: "numeric",
         month: "long",
         year: "numeric",
+        minute: "2-digit",
+        hour: "2-digit",
       }).format(new Date(timestamp))
     : "-";
 
@@ -35,11 +37,8 @@ export default function DepartemenPage() {
   const [error, setError] = useState<string | null>(null);
 
   const role = user?.role ?? "administrator";
-  const menu = getMenuByRole(
-    role,
-    user?.menus,
-  );
- 
+  const menu = getMenuByRole(role, user?.menus);
+
   const displayName = user?.name || "Administrator Koperasi";
 
   const loadDepartments = async () => {
@@ -79,29 +78,60 @@ export default function DepartemenPage() {
 
   const columns = useMemo(
     () => [
-      { key: "No", header: "No", className: "w-16", accessor: (_row: DepartemenRow, index: number) => index },
-      { key: "Deptid", header: "Dept Id", className: "w-24", accessor: (row: DepartemenRow) => row.Deptid },
-      { key: "Departemen", header: "Nama Departemen", accessor: (row: DepartemenRow) => row.Departemen },
-      { key: "createdUser", header: "Dibuat Oleh", accessor: (row: DepartemenRow) => row.createdUser },
-      { key: "createdDate", header: "Tanggal Dibuat", accessor: (row: DepartemenRow) => formatTanggal(row.createdDate) },
+      {
+        key: "No",
+        header: "No",
+        className: "w-16",
+        accessor: (_row: DepartemenRow, index: number) => index,
+      },
+      {
+        key: "Deptid",
+        header: "Dept Id",
+        className: "w-24",
+        accessor: (row: DepartemenRow) => row.Deptid,
+      },
+      {
+        key: "Departemen",
+        header: "Nama Departemen",
+        accessor: (row: DepartemenRow) => row.Departemen,
+      },
+      {
+        key: "createdUser",
+        header: "Dibuat Oleh",
+        accessor: (row: DepartemenRow) => row.createdUser,
+      },
+      {
+        key: "createdDate",
+        header: "Tanggal Dibuat",
+        accessor: (row: DepartemenRow) => formatTanggal(row.createdDate),
+      },
     ],
-    []
+    [],
   );
 
   const handleCreate = () => router.push("/data-karyawan/departemen/create");
-  const handleEdit = (row: DepartemenRow) => router.push(`/data-karyawan/departemen/edit/${row.Deptid}`);
+  const handleEdit = (row: DepartemenRow) =>
+    router.push(`/data-karyawan/departemen/edit/${row.Deptid}`);
   const handleDelete = async (row: DepartemenRow) => {
-    const result = await showConfirm(`Data departemen "${row.Departemen}" akan dihapus.`);
-
+    const result = await showConfirm(
+      `Data departemen "${row.Departemen}" akan dihapus.`,
+    );
     if (result.isConfirmed) {
       try {
         await departmentApi.delete(row.Deptid);
-        setDepartemenData((current) => current.filter((department) => department.Deptid !== row.Deptid));
-        await showAlert("success", `Departemen "${row.Departemen}" berhasil dihapus.`);
+        setDepartemenData((current) =>
+          current.filter((department) => department.Deptid !== row.Deptid),
+        );
+        await showAlert(
+          "success",
+          `Departemen "${row.Departemen}" berhasil dihapus.`,
+        );
       } catch (requestError) {
         await showAlert(
           "danger",
-          requestError instanceof Error ? requestError.message : "Gagal menghapus departemen.",
+          requestError instanceof Error
+            ? requestError.message
+            : "Gagal menghapus departemen.",
         );
       }
     }
@@ -109,19 +139,23 @@ export default function DepartemenPage() {
 
   return (
     <DashboardShell
-      title="Departemen"
+      title="Department"
       subtitle="Unit kerja koperasi"
       displayName={displayName}
       groupName={user?.groupName || "Koperasi"}
       menu={menu}
       onLogout={logout}
-      actionLabel="Tambah unit"
+      actionLabel="Tambah Department"
       onAction={handleCreate}
     >
       {error ? (
         <div className="mb-4 flex flex-col gap-3 rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive sm:flex-row sm:items-center sm:justify-between">
           <span>{error}</span>
-          <Button variant="outline" size="sm" onClick={() => void loadDepartments()}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => void loadDepartments()}
+          >
             <RefreshCw className="size-4" />
             Coba lagi
           </Button>
@@ -129,24 +163,36 @@ export default function DepartemenPage() {
       ) : null}
       <div className="mt-0">
         <DataTable
-          title="Daftar departemen"
-          subtitle="Kelola unit kerja dan struktur organisasi"
+          title="Daftar department"
+          subtitle="Mengelola data department anggota koperasi"
           data={departemenData}
           columns={columns}
           onCreate={handleCreate}
           onEdit={handleEdit}
           onDelete={handleDelete}
-          createLabel="Create New Data"
-          searchPlaceholder="Cari departemen..."
+          createLabel="Tambah Department"
+          searchPlaceholder="Cari department..."
           pageSize={10}
-          emptyMessage={loading ? "Memuat data departemen..." : "Belum ada data departemen."}
+          emptyMessage={
+            loading ? "Memuat data department..." : "Belum ada data department."
+          }
           renderActions={(row) => (
             <>
-              <Button variant="outline" size="sm" onClick={() => handleEdit(row)} className="h-8 gap-1.5">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleEdit(row)}
+                className="h-8 gap-1.5"
+              >
                 <Edit className="size-3.5" />
                 Edit
               </Button>
-              <Button variant="destructive" size="sm" onClick={() => handleDelete(row)} className="h-8 gap-1.5">
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={() => handleDelete(row)}
+                className="h-8 gap-1.5"
+              >
                 <Trash2 className="size-3.5" />
                 Delete
               </Button>
