@@ -1,15 +1,16 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/lib/auth/auth-context";
 import { DashboardLayout } from "@/components/dashboard/dashboard-layout";
 
-
-const geist = Geist({ subsets: ["latin"], variable: "--font-geist-sans" });
-const geistMono = Geist_Mono({ subsets: ["latin"], variable: "--font-geist-mono" });
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+});
 
 export const metadata: Metadata = {
-  title: "kopera — Koperasi untuk semua",
+  title: "KKUB PT. Excelitas Technologies Batam",
   description: "Simpan, tumbuh, dan berdampak bersama koperasi",
   manifest: "/manifest.json",
   appleWebApp: {
@@ -25,12 +26,12 @@ export const viewport: Viewport = {
   userScalable: false,
 };
 
- 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-      
+export default function RootLayout({
+  children,
+}: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="id" className="bg-background">
-      <body className={`${geist.variable} ${geistMono.variable} antialiased`}>
+      <body className={`${inter.variable} antialiased`}>
         <AuthProvider>
           <DashboardLayout>{children}</DashboardLayout>
         </AuthProvider>
@@ -38,3 +39,5 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     </html>
   );
 }
+
+
