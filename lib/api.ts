@@ -1,4 +1,5 @@
 import axios, { type AxiosError, type InternalAxiosRequestConfig } from "axios";
+import { ApiMenuNode } from "./auth/types";
 
 type RetryableRequestConfig = InternalAxiosRequestConfig & {
   _retry?: boolean;
@@ -115,6 +116,20 @@ export type UpdateDepartmentPayload = {
   departmentName: string;
 };
 
+export type CreateMenuPayload = {
+  menuName: string;
+  menuRoute?: string;
+  menuSort: number;
+  menuParentId?: string | number;
+  postBy?: string;
+};
+
+export type UpdateMenuPayload = {
+  menuName?: string;
+  menuRoute?: string;
+  menuSort?: number;
+};
+
 export const departmentApi = {
   findAll: () => handleResponse<Department[]>(api.get("/department")),
   findOne: (departmentId: string) =>
@@ -125,3 +140,17 @@ export const departmentApi = {
     handleResponse<{ message: string }>(api.patch(`/department/${departmentId}`, department)),
   delete: (departmentId: string) => handleResponse<void>(api.delete(`/department/${departmentId}`)),
 };
+
+
+export const menuApi = {
+  findAllParent: () =>
+    handleResponse<ApiMenuNode[]>(api.get("/menu/parent")),
+  findAllChild: (parentId: string) =>
+    handleResponse<ApiMenuNode[]>(api.get(`/menu/child/${parentId}`)),
+  create: (menu: CreateMenuPayload) =>
+    handleResponse<ApiMenuNode>(api.post("/menu/create", menu)),
+  update: (menuId: string, menu: UpdateMenuPayload) =>
+    handleResponse<{ message: string }>(api.patch(`/menu/${menuId}`, menu)),
+  delete: (menuId: string) => handleResponse<void>(api.delete(`/menu/${menuId}`)),
+  findOne: (menuId: string) => handleResponse<ApiMenuNode>(api.get(`/menu/${menuId}`)),
+};  
