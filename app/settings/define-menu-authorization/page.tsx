@@ -6,20 +6,126 @@ import { CheckSquare, Save, ShieldCheck } from "lucide-react";
 import { DashboardShell } from "@/components/dashboard/app-shell";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { showAlert } from "@/lib/alert";
+import { groupApi, groupMenuAuthApi, type Group } from "@/lib/api";
 import { useAuth } from "@/lib/auth/auth-context";
 import { getMenuByRole } from "@/lib/auth/navigation";
 import type { ApiMenuNode } from "@/lib/auth/types";
 
-const menuKey = (menu: ApiMenuNode) => String(menu.menuId);
+const menuKey = (menu: ApiMenuNode) => {
+	const rawMenu = menu as ApiMenuNode & {
+		menuID?: string | number;
+		menu_id?: string | number;
+		MenuId?: string | number;
+		id?: string | number;
+		menu?: { menuId?: string | number; menuID?: string | number; id?: string | number };
+	};
+	return String(
+		rawMenu.menuId ??
+		rawMenu.menuID ??
+		rawMenu.menu_id ??
+		rawMenu.MenuId ??
+		rawMenu.id ??
+		rawMenu.menu?.menuId ??
+		rawMenu.menu?.menuID ??
+		rawMenu.menu?.id ??
+		"",
+	);
+};
 
 const getChildKeys = (menu: ApiMenuNode) =>
 	(menu.children ?? []).map(menuKey);
 
+const getGroupId = (group: Group) =>
+	String(group.groupId ?? group.GroupId ?? group.id ?? "");
+
+const getGroupName = (group: Group) =>
+	group.groupName ?? group.GroupName ?? group.name ?? getGroupId(group);
+
+const getAccessValue = (menu: ApiMenuNode) => {
+	const rawMenu = menu as ApiMenuNode & {
+		access_value?: number | string;
+		access?: number | string;
+		Access?: number | string;
+		accessStatus?: string;
+		menu?: { accessValue?: number | string; access_value?: number | string };
+	};
+	return Number(
+		rawMenu.accessValue ??
+		rawMenu.access_value ??
+		rawMenu.access ??
+		rawMenu.Access ??
+		rawMenu.menu?.accessValue ??
+		rawMenu.menu?.access_value ??
+		0,
+	);
+};
+
+const normalizeGroups = (payload: unknown): Group[] => {
+	if (Array.isArray(payload)) {
+		return payload.filter((group): group is Group => typeof group === "object" && group !== null);
+	}
+
+	if (typeof payload !== "object" || payload === null) {
+		return [];
+	}
+
+	const response = payload as Record<string, unknown>;
+	for (const key of ["data", "groups", "items", "results", "rows"]) {
+		if (key in response) {
+			return normalizeGroups(response[key]);
+		}
+	}
+
+	return [];
+};
+
+const normalizeAuthorizationMenus = (payload: unknown): ApiMenuNode[] => {
+	if (Array.isArray(payload)) {
+		return payload.filter(
+			(menu): menu is ApiMenuNode => typeof menu === "object" && menu !== null,
+		);
+	}
+
+	if (typeof payload !== "object" || payload === null) {
+		return [];
+	}
+
+	const response = payload as Record<string, unknown>;
+	for (const key of ["data", "menus", "menuAuth", "groupAuth", "authorization", "permissions", "items", "results", "rows"]) {
+		if (key in response) {
+			return normalizeAuthorizationMenus(response[key]);
+		}
+	}
+
+	return [];
+};
+
+const collectAllowedMenuIds = (menus: ApiMenuNode[], result = new Set<string>()) => {
+	menus.forEach((menu) => {
+		if (getAccessValue(menu) === 1 || menu.accessStatus?.toLowerCase() === "allowed") {
+			result.add(menuKey(menu));
+		}
+		if (menu.children?.length) {
+			collectAllowedMenuIds(menu.children, result);
+		}
+	});
+
+	return result;
+};
+
+const flattenMenus = (menus: ApiMenuNode[]) =>
+	menus.flatMap((parent) => [parent, ...(parent.children ?? [])]);
+
 export default function DefineMenuAuthorizationPage() {
 	const { logout, user } = useAuth();
 	const [checkedMenus, setCheckedMenus] = useState<Set<string>>(new Set());
-    const groupName = user?.groupName || "Koperasi";
-    const groupId = user?.groupId || "1";
+	const [groups, setGroups] = useState<Group[]>([]);
+	const [selectedGroupId, setSelectedGroupId] = useState("");
+	const [isLoadingGroups, setIsLoadingGroups] = useState(false);
+	const [isLoadingAuthorization, setIsLoadingAuthorization] = useState(false);
+	const [isSaving, setIsSaving] = useState(false);
+	const [errorMessage, setErrorMessage] = useState("");
 
 	const role = user?.role ?? "administrator";
 	const navigationMenu = getMenuByRole(role, user?.menus);
@@ -29,6 +135,57 @@ export default function DefineMenuAuthorizationPage() {
 	useEffect(() => {
 		setCheckedMenus(new Set());
 	}, [user?.id]);
+
+	useEffect(() => {
+		if (!user) {
+			return;
+		}
+
+		const loadGroups = async () => {
+			setIsLoadingGroups(true);
+			setErrorMessage("");
+			try {
+				const nextGroups = normalizeGroups(await groupApi.findAll());
+				setGroups(nextGroups);
+				setSelectedGroupId((current) =>
+					current && nextGroups.some((group) => getGroupId(group) === current)
+						? current
+						: nextGroups.some((group) => getGroupId(group) === String(user.groupId))
+							? String(user.groupId)
+							: getGroupId(nextGroups[0] ?? {}),
+				);
+			} catch (error) {
+				setErrorMessage(error instanceof Error ? error.message : "Group gagal dimuat dari server.");
+			} finally {
+				setIsLoadingGroups(false);
+			}
+		};
+
+		void loadGroups();
+	}, [user]);
+
+	useEffect(() => {
+		if (!selectedGroupId) {
+			setCheckedMenus(new Set());
+			return;
+		}
+
+		const loadAuthorization = async () => {
+			setIsLoadingAuthorization(true);
+			setErrorMessage("");
+			try {
+				const authorization = await groupMenuAuthApi.findAll(selectedGroupId);
+				setCheckedMenus(collectAllowedMenuIds(normalizeAuthorizationMenus(authorization)));
+			} catch (error) {
+				setCheckedMenus(new Set());
+				setErrorMessage(error instanceof Error ? error.message : "Authorization gagal dimuat dari server.");
+			} finally {
+				setIsLoadingAuthorization(false);
+			}
+		};
+
+		void loadAuthorization();
+	}, [selectedGroupId]);
 
 	const selectedCount = checkedMenus.size;
 	const totalCount = useMemo(
@@ -47,7 +204,7 @@ export default function DefineMenuAuthorizationPage() {
 			return checkedMenus.has(menuKey(parent));
 		}
 
-		return checkedMenus.has(menuKey(parent));
+		return checkedMenus.has(menuKey(parent)) || children.some((child) => checkedMenus.has(menuKey(child)));
 	};
 
 	const toggleParent = (parent: ApiMenuNode) => {
@@ -84,9 +241,9 @@ export default function DefineMenuAuthorizationPage() {
 			}
 
 			const childIds = getChildKeys(parent);
-			const allChildrenChecked = childIds.every((id) => next.has(id));
+			const hasCheckedChild = childIds.some((id) => next.has(id));
 
-			if (allChildrenChecked) {
+			if (hasCheckedChild) {
 				next.add(parentId);
 			} else {
 				next.delete(parentId);
@@ -94,6 +251,33 @@ export default function DefineMenuAuthorizationPage() {
 
 			return next;
 		});
+	};
+
+	const handleSave = async () => {
+		if (!selectedGroupId) {
+			await showAlert("warning", "Pilih group terlebih dahulu.");
+			return;
+		}
+
+		setIsSaving(true);
+		setErrorMessage("");
+		try {
+			await groupMenuAuthApi.update(
+				selectedGroupId,
+				flattenMenus(parentMenus).map((menu) => ({
+					groupId: Number(selectedGroupId),
+					menuId: Number(menuKey(menu)),
+					access: checkedMenus.has(menuKey(menu)) ? 1 : 0,
+				})),
+			);
+			await showAlert("success", "Authorization berhasil disimpan.");
+		} catch (error) {
+			const message = error instanceof Error ? error.message : "Authorization gagal disimpan.";
+			setErrorMessage(message);
+			await showAlert("danger", message);
+		} finally {
+			setIsSaving(false);
+		}
 	};
 
 	if (!user) {
@@ -130,12 +314,28 @@ export default function DefineMenuAuthorizationPage() {
                     
 
 					<CardContent className="space-y-3 p-5">
-						 <h4 className="font-semibold">Select User by Group Id</h4>
-                        <div className="flex items-left w-20 gap-3 rounded-2xl border border-border/70 bg-muted/20 px-4 py-3 text-sm text-muted-foreground">
-							<select>
-                                <option value={groupId}>{groupName}</option>
-                            </select>
-                        </div>
+						{errorMessage ? (
+							<p className="rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive">{errorMessage}</p>
+						) : null}
+						<label className="block max-w-sm space-y-2 text-sm font-semibold">
+							<span>Select Group</span>
+							<select
+								value={selectedGroupId}
+								onChange={(event) => setSelectedGroupId(event.target.value)}
+								disabled={isLoadingGroups || isSaving}
+								className="w-full rounded-lg border border-input bg-background px-3 py-2 font-normal"
+							>
+								<option value="">{isLoadingGroups ? "Memuat group..." : "Pilih group"}</option>
+								{groups.map((group) => (
+									<option key={getGroupId(group)} value={getGroupId(group)}>
+										{getGroupName(group)}
+									</option>
+								))}
+							</select>
+						</label>
+						{isLoadingAuthorization ? (
+							<p className="text-sm text-muted-foreground">Memuat authorization group...</p>
+						) : null}
                         
 						{parentMenus.length === 0 ? (
                             
@@ -197,7 +397,7 @@ export default function DefineMenuAuthorizationPage() {
 					</CardContent>
 
 					<div className="flex justify-end border-t bg-muted/10 px-5 py-4">
-						<Button type="button" className="gap-2" disabled={parentMenus.length === 0}>
+						<Button type="button" className="gap-2" disabled={parentMenus.length === 0 || !selectedGroupId || isSaving || isLoadingAuthorization} onClick={() => void handleSave()}>
 							<Save className="size-4" />
 							Simpan Authorization
 						</Button>

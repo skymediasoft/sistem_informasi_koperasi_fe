@@ -107,6 +107,21 @@ export type Department = {
   departmentCreateDate?: string | number;
 };
 
+export type Group = {
+  groupId?: string | number;
+  groupName?: string;
+  groupCreatedUser?: string;
+  groupCreateDate?: string | number;
+  GroupId?: string | number;
+  GroupName?: string;
+  GroupCreatedUser?: string;
+  GroupCreateDate?: string | number;
+  id?: string | number;
+  name?: string;
+  createdUser?: string;
+  createdDate?: string | number;
+};
+
 export type CreateDepartmentPayload = {
   departmentId: string;
   departmentName: string;
@@ -114,6 +129,44 @@ export type CreateDepartmentPayload = {
 
 export type UpdateDepartmentPayload = {
   departmentName: string;
+};
+
+export type CreateGroupPayload = {
+  groupId: string | number;
+  groupName: string;
+};
+
+export type UpdateGroupPayload = {
+  groupName: string;
+};
+
+export type User = {
+  id?: string | number;
+  userId?: string | number;
+  UserId?: string | number;
+  userlogin?: string;
+  userLogin?: string;
+  UserLogin?: string;
+  username?: string;
+  userName?: string;
+  UserName?: string;
+  email?: string;
+  UserEmail?: string;
+  groupId?: string | number;
+  group_id?: string | number;
+  GroupId?: string | number;
+};
+
+export type RegisterUserPayload = {
+  userlogin: string;
+  username: string;
+  password: string;
+  email: string;
+  groupId?: number;
+};
+
+export type UpdateUserPayload = Partial<Omit<RegisterUserPayload, "password">> & {
+  password?: string;
 };
 
 export type CreateMenuPayload = {
@@ -141,6 +194,14 @@ export const departmentApi = {
   delete: (departmentId: string) => handleResponse<void>(api.delete(`/department/${departmentId}`)),
 };
 
+export const groupApi = {
+  findAll: () => handleResponse<unknown>(api.get("/group")),
+  create: (group: CreateGroupPayload) =>
+    handleResponse<Group>(api.post("/group", group)),
+  update: (groupId: string, group: UpdateGroupPayload) =>
+    handleResponse<{ message: string }>(api.patch(`/group/${groupId}`, group)),
+  delete: (groupId: string) => handleResponse<void>(api.delete(`/group/${groupId}`)),
+};
 
 export const menuApi = {
   findAllParent: () =>
@@ -154,3 +215,21 @@ export const menuApi = {
   delete: (menuId: string) => handleResponse<void>(api.delete(`/menu/${menuId}`)),
   findOne: (menuId: string) => handleResponse<ApiMenuNode>(api.get(`/menu/${menuId}`)),
 };  
+
+
+export const groupMenuAuthApi = {
+  findAll: (groupId: string) =>
+    handleResponse<unknown>(api.get(`/group/auth/${groupId}`)),
+  update: (
+    groupId: string,
+    menuAuth: { groupId: number; menuId: number; access: number }[],
+  ) =>
+    handleResponse<{ message: string }>(api.patch(`/group/auth/${groupId}`, menuAuth)),
+};
+
+export const userApi = {
+  findAll: () => handleResponse<unknown>(api.get("/user")),
+  update: (userId: string, user: UpdateUserPayload) =>
+    handleResponse<{ message: string }>(api.patch(`/user/${userId}`, user)),
+  delete: (userId: string) => handleResponse<void>(api.delete(`/user/${userId}`)),
+};
