@@ -151,7 +151,10 @@ export type User = {
   userName?: string;
   UserName?: string;
   email?: string;
+  userEmail?: string;
   UserEmail?: string;
+  postBy?: string;
+  postDate?: string | number;
   groupId?: string | number;
   group_id?: string | number;
   GroupId?: string | number;
@@ -228,8 +231,8 @@ export const groupMenuAuthApi = {
 };
 
 export const userApi = {
-  findAll: () => handleResponse<unknown>(api.get("/user")),
+  findAll: () => handleResponse<unknown>(api.get("/auth/users")),
   update: (userId: string, user: UpdateUserPayload) =>
-    handleResponse<{ message: string }>(api.patch(`/user/${userId}`, user)),
-  delete: (userId: string) => handleResponse<void>(api.delete(`/user/${userId}`)),
+    handleResponse<{ message: string }>(api.patch(`/auth/users/${userId}`, user)),
+  delete: (userId: string) => handleResponse<void>(api.delete(`/auth/users/${userId}`)),
 };

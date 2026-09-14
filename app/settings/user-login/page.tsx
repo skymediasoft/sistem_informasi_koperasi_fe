@@ -45,11 +45,13 @@ const normalizeList = <T,>(payload: unknown): T[] => {
   return [];
 };
 
-const getUserId = (user: User) => String(user.id ?? user.userId ?? user.UserId ?? "");
+const getUserId = (user: User) => String(
+  user.id ?? user.userId ?? user.UserId ?? user.userLogin ?? user.UserLogin ?? "",
+);
 const getUserGroupId = (user: User) => String(user.groupId ?? user.group_id ?? user.GroupId ?? "");
 const getUserLogin = (user: User) => user.userlogin ?? user.userLogin ?? user.UserLogin ?? "-";
 const getUserName = (user: User) => user.username ?? user.userName ?? user.UserName ?? "-";
-const getEmail = (user: User) => user.email ?? user.UserEmail ?? "-";
+const getEmail = (user: User) => user.userEmail ?? user.email ?? user.UserEmail ?? "-";
 
 export default function UserLoginPage() {
   const router = useRouter();
@@ -72,7 +74,10 @@ export default function UserLoginPage() {
     setError(null);
 
     try {
-      const [usersPayload, groupsPayload] = await Promise.all([userApi.findAll(), groupApi.findAll()]);
+      const [usersPayload, groupsPayload] = await Promise.all([
+        userApi.findAll(),
+        groupApi.findAll(),
+      ]);
       const loadedGroups = normalizeList<Group>(groupsPayload);
       const groupNames = new Map(loadedGroups.map((group) => [getGroupOptionId(group), getGroupName(group)]));
       setGroups(loadedGroups);
