@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense, useEffect, useState } from "react";
-import { Landmark, LockKeyhole, ShieldCheck } from "lucide-react";
+import { Eye, EyeOff, Landmark, ShieldCheck } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -25,6 +25,9 @@ function AdminLoginForm() {
   const [password, setPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -106,13 +109,15 @@ function AdminLoginForm() {
                   Password baru
                   <div className="relative">
                     <Input
-                      type="password"
+                      type={showNewPassword ? "text" : "password"}
                       value={newPassword}
                       onChange={(event) => setNewPassword(event.target.value)}
                       placeholder="Minimal 6 karakter"
                       className="pr-10"
                     />
-                    <LockKeyhole className="absolute right-3 top-3 size-4 text-muted-foreground" />
+                    <button type="button" onClick={() => setShowNewPassword((current) => !current)} className="absolute inset-y-0 right-0 flex w-10 items-center justify-center text-muted-foreground transition-colors hover:text-foreground" aria-label={showNewPassword ? "Sembunyikan password baru" : "Lihat password baru"} title={showNewPassword ? "Sembunyikan password baru" : "Lihat password baru"}>
+                      {showNewPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                    </button>
                   </div>
                 </label>
 
@@ -120,13 +125,15 @@ function AdminLoginForm() {
                   Konfirmasi password baru
                   <div className="relative">
                     <Input
-                      type="password"
+                      type={showConfirmPassword ? "text" : "password"}
                       value={confirmPassword}
                       onChange={(event) => setConfirmPassword(event.target.value)}
                       placeholder="Ulangi password baru"
                       className="pr-10"
                     />
-                    <LockKeyhole className="absolute right-3 top-3 size-4 text-muted-foreground" />
+                    <button type="button" onClick={() => setShowConfirmPassword((current) => !current)} className="absolute inset-y-0 right-0 flex w-10 items-center justify-center text-muted-foreground transition-colors hover:text-foreground" aria-label={showConfirmPassword ? "Sembunyikan konfirmasi password" : "Lihat konfirmasi password"} title={showConfirmPassword ? "Sembunyikan konfirmasi password" : "Lihat konfirmasi password"}>
+                      {showConfirmPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                    </button>
                   </div>
                 </label>
 
@@ -155,13 +162,15 @@ function AdminLoginForm() {
                   Kata sandi
                   <div className="relative">
                     <Input
-                      type="password"
+                      type={showPassword ? "text" : "password"}
                       value={password}
                       onChange={(event) => setPassword(event.target.value)}
                       placeholder="••••••••"
                       className="pr-10"
                     />
-                    <LockKeyhole className="absolute right-3 top-3 size-4 text-muted-foreground" />
+                    <button type="button" onClick={() => setShowPassword((current) => !current)} className="absolute inset-y-0 right-0 flex w-10 items-center justify-center text-muted-foreground transition-colors hover:text-foreground" aria-label={showPassword ? "Sembunyikan password" : "Lihat password"} title={showPassword ? "Sembunyikan password" : "Lihat password"}>
+                      {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                    </button>
                   </div>
                 </label>
 

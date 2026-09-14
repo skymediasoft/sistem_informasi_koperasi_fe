@@ -7,8 +7,24 @@ const buildHeaders = (token?: string | null) => ({
 
 const api_base_url = process.env.NEXT_PUBLIC_API_URL
 
+export type RegisterPayload = {
+  userlogin: string;
+  username: string;
+  password: string;
+  email: string;
+  groupId?: number;
+};
+
 
 export const authApi = {
+  register: async (payload: RegisterPayload) => {
+    const res = await axios.post(`${api_base_url}/auth/register`, payload, {
+      headers: buildHeaders(),
+      withCredentials: false,
+    });
+    return res.data;
+  },
+
   login: async (userlogin: string, password: string) => {
     const res = await axios.post(`${api_base_url}/auth/login`, { userlogin, password }, {
       headers: buildHeaders(),

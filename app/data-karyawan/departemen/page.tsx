@@ -145,7 +145,7 @@ export default function DepartemenPage() {
       groupName={user?.groupName || "Koperasi"}
       menu={menu}
       onLogout={logout}
-      actionLabel="Tambah Department"
+      actionLabel="Tambah unit"
       onAction={handleCreate}
     >
       {error ? (
