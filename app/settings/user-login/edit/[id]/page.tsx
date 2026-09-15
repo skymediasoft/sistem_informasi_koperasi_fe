@@ -44,7 +44,7 @@ export default function EditUserPage() {
         const loadedGroups = normalizeList<Group>(groupsPayload);
         if (!userRecord) throw new Error("User tidak ditemukan.");
         setGroups(loadedGroups);
-        setSelectedUser({ userlogin: userRecord.userlogin ?? userRecord.userLogin ?? userRecord.UserLogin ?? "", username: userRecord.username ?? userRecord.userName ?? userRecord.UserName ?? "", email: userRecord.userEmail ?? userRecord.email ?? userRecord.UserEmail ?? "", groupId: getUserGroupId(userRecord), password: "" });
+        setSelectedUser({ userlogin: userRecord.userlogin ?? userRecord.userLogin ?? userRecord.UserLogin ?? "", username: userRecord.username ?? userRecord.userName ?? userRecord.UserName ?? "", email: userRecord.userEmail ?? userRecord.email ?? userRecord.UserEmail ?? "", groupId: getUserGroupId(userRecord), password: "123456" });
       } catch (requestError) {
         await showAlert("danger", requestError instanceof Error ? requestError.message : "Gagal memuat group.");
         router.push("/settings/user-login");
@@ -57,8 +57,14 @@ export default function EditUserPage() {
 
   const handleSubmit = async (values: UserLoginFormValues) => {
     try {
-      const payload = { username: values.username, email: values.email, groupId: values.groupId ? Number(values.groupId) : undefined, ...(values.password ? { password: values.password } : {}) };
-      await userApi.update(groupId, payload);
+      const payload = {
+        userlogin: values.userlogin,
+        userloginInput: values.userlogin,
+        username: values.username,
+        email: values.email,
+        ...(values.groupId ? { groupId: Number(values.groupId) } : {}),
+      };
+      await userApi.update(payload);
       await showAlert("success", `User "${values.username}" berhasil diperbarui.`);
       router.push("/settings/user-login");
     } catch (requestError) {
@@ -70,7 +76,9 @@ export default function EditUserPage() {
     <DashboardShell title="Edit User" subtitle="Perbarui data user login" displayName={user?.name || "Administrator Koperasi"} groupName={user?.groupName || "Koperasi"} menu={menu} secondaryMenu={secondaryMenu} onLogout={logout} actionLabel="Kembali" onAction={() => router.push("/settings/user-login")}>
       <div className="mx-auto max-w-4xl">
         <div className="mb-5 flex items-center gap-3 rounded-2xl bg-accent/10 p-4 text-accent-foreground"><Users className="size-5" /><span className="font-medium">Mengubah data user login yang sudah ada.</span></div>
-        {loading ? <p className="text-sm text-muted-foreground">Memuat data user...</p> : selectedUser ? <UserLoginForm mode="edit" groups={groups} initialValues={selectedUser} onSubmit={handleSubmit} onCancel={() => router.push("/settings/user-login")} /> : null}
+        {loading ? <p className="text-sm text-muted-foreground">Memuat data user...</p> : selectedUser ? <>
+          <UserLoginForm mode="edit" groups={groups} initialValues={selectedUser} onSubmit={handleSubmit} onCancel={() => router.push("/settings/user-login")} onResetPassword={() => router.push(`/settings/user-login/reset-password/${groupId}`)} />
+        </> : null}
       </div>
     </DashboardShell>
   );

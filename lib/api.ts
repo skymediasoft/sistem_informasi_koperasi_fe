@@ -168,8 +168,12 @@ export type RegisterUserPayload = {
   groupId?: number;
 };
 
-export type UpdateUserPayload = Partial<Omit<RegisterUserPayload, "password">> & {
-  password?: string;
+export type UpdateUserPayload = {
+  userlogin?: string;
+  userloginInput?: string;
+  username?: string;
+  email?: string;
+  groupId?: number;
 };
 
 export type CreateMenuPayload = {
@@ -232,7 +236,12 @@ export const groupMenuAuthApi = {
 
 export const userApi = {
   findAll: () => handleResponse<unknown>(api.get("/auth/users")),
-  update: (userId: string, user: UpdateUserPayload) =>
-    handleResponse<{ message: string }>(api.patch(`/auth/users/${userId}`, user)),
+  register: (user: RegisterUserPayload) =>
+    handleResponse<User>(api.post("/auth/register", user)),
+  findOne: (userId: string) => handleResponse<User>(api.get(`/auth/users/${userId}`)),
+  update: (user: UpdateUserPayload) =>
+    handleResponse<{ message: string }>(api.patch("/auth/users", user)),
+  resetpassword: (userlogin: string, newPassword: string) =>
+    handleResponse<{ message: string }>(api.patch("/auth/admin-reset-password", { userlogin, newPassword })),
   delete: (userId: string) => handleResponse<void>(api.delete(`/auth/users/${userId}`)),
 };

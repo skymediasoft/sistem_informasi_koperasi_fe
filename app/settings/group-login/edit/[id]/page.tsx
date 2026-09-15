@@ -14,6 +14,23 @@ import { groupApi, type Group } from "@/lib/api";
 const getGroupId = (group: Group) => String(group.groupId ?? group.GroupId ?? group.id ?? "");
 const getGroupName = (group: Group) => group.groupName ?? group.GroupName ?? group.name ?? "";
 
+const normalizeGroups = (payload: unknown): Group[] => {
+  if (Array.isArray(payload)) {
+    return payload.filter(
+      (group): group is Group => typeof group === "object" && group !== null,
+    );
+  }
+
+  if (typeof payload !== "object" || payload === null) return [];
+
+  const response = payload as Record<string, unknown>;
+  for (const key of ["data", "groups", "items", "results", "rows"]) {
+    if (key in response) return normalizeGroups(response[key]);
+  }
+
+  return [];
+};
+
 export default function EditGroupPage() {
   const router = useRouter();
   const params = useParams<{ id?: string }>();
@@ -27,8 +44,8 @@ export default function EditGroupPage() {
     const loadGroup = async () => {
       if (!groupId) return;
       try {
-        const groups = await groupApi.findAll();
-        const group = (Array.isArray(groups) ? groups : []).find((item) => getGroupId(item as Group) === groupId) as Group | undefined;
+        const groups = normalizeGroups(await groupApi.findAll());
+        const group = groups.find((item) => getGroupId(item) === groupId);
         if (!group) throw new Error("Group tidak ditemukan.");
         setSelectedGroup({ GroupId: getGroupId(group), GroupName: getGroupName(group) });
       } catch (requestError) {
