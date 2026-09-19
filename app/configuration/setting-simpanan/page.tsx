@@ -266,8 +266,8 @@ console.log(
 
   return (
     <DashboardShell
-      title="Pusat laporan"
-      subtitle="Laporan & akuntansi"
+      title="Pengaturan Simpanan"
+      subtitle=""
       displayName={
         user?.name || "Administrator Koperasi"
       }
@@ -279,7 +279,7 @@ console.log(
         <div className="mb-5 flex items-center gap-3 rounded-2xl bg-primary/5 p-4 text-primary">
           <Wallet className="h-5 w-5" />
           <span className="font-medium">
-            Setting standar simpanan
+            Pengaturan Default Simpanan Pokok, Simpanan Wajib dan Maksimal Simpanan Sukarela Anggota.
           </span>
         </div>
       </div>
@@ -288,7 +288,7 @@ console.log(
         <Card className="px-4 py-2">
           <CardHeader>
             <CardTitle className="text-base">
-              Laporan simpanan anggota
+              Pengaturan simpanan saat ini:
             </CardTitle>
           </CardHeader>
 
@@ -336,7 +336,7 @@ console.log(
         <Card className="px-3 py-2">
           <CardHeader>
             <CardTitle className="text-base">
-              Ubah Setting Simpanan
+              Pengaturan simpanan baru:
             </CardTitle>
           </CardHeader>
 
