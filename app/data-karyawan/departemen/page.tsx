@@ -79,11 +79,10 @@ export default function DepartemenPage() {
 
   const columns = useMemo(
     () => [
-      { key: "No", header: "No", className: "w-16", accessor: (_row: DepartemenRow, index: number) => index },
-      { key: "Deptid", header: "Dept Id", className: "w-24", accessor: (row: DepartemenRow) => row.Deptid },
-      { key: "Departemen", header: "Nama Departemen", accessor: (row: DepartemenRow) => row.Departemen },
-      { key: "createdUser", header: "Dibuat Oleh", accessor: (row: DepartemenRow) => row.createdUser },
-      { key: "createdDate", header: "Tanggal Dibuat", accessor: (row: DepartemenRow) => formatTanggal(row.createdDate) },
+      { key: "Deptid", header: "Dept ID", className: "w-24", accessor: (row: DepartemenRow) => row.Deptid },
+      { key: "Departemen", header: "Nama Department", accessor: (row: DepartemenRow) => row.Departemen },
+      { key: "PostBy", header: "Post By", accessor: (row: DepartemenRow) => row.createdUser },
+      { key: "PostDate", header: "Post Date", accessor: (row: DepartemenRow) => formatTanggal(row.createdDate) },
     ],
     []
   );
@@ -91,17 +90,17 @@ export default function DepartemenPage() {
   const handleCreate = () => router.push("/data-karyawan/departemen/create");
   const handleEdit = (row: DepartemenRow) => router.push(`/data-karyawan/departemen/edit/${row.Deptid}`);
   const handleDelete = async (row: DepartemenRow) => {
-    const result = await showConfirm(`Data departemen "${row.Departemen}" akan dihapus.`);
+    const result = await showConfirm(`Data Department "${row.Departemen}" akan dihapus.`);
 
     if (result.isConfirmed) {
       try {
         await departmentApi.delete(row.Deptid);
         setDepartemenData((current) => current.filter((department) => department.Deptid !== row.Deptid));
-        await showAlert("success", `Departemen "${row.Departemen}" berhasil dihapus.`);
+        await showAlert("success", `Department "${row.Departemen}" berhasil dihapus.`);
       } catch (requestError) {
         await showAlert(
           "danger",
-          requestError instanceof Error ? requestError.message : "Gagal menghapus departemen.",
+          requestError instanceof Error ? requestError.message : "Gagal menghapus Department.",
         );
       }
     }
@@ -109,13 +108,13 @@ export default function DepartemenPage() {
 
   return (
     <DashboardShell
-      title="Departemen"
-      subtitle="Unit kerja koperasi"
+      title="Department"
+      subtitle=""
       displayName={displayName}
       groupName={user?.groupName || "Koperasi"}
       menu={menu}
       onLogout={logout}
-      actionLabel="Tambah Departemen"
+      actionLabel="Tambah Department"
       onAction={handleCreate}
     >
       {error ? (
@@ -129,17 +128,17 @@ export default function DepartemenPage() {
       ) : null}
       <div className="mt-0">
         <DataTable
-          title="Daftar departemen"
-          subtitle="Kelola unit kerja dan struktur organisasi"
+          title="Daftar Department"
+          subtitle="Tambah, Edit dan Hapus Department"
           data={departemenData}
           columns={columns}
           onCreate={handleCreate}
           onEdit={handleEdit}
           onDelete={handleDelete}
-          createLabel="Create New Data"
-          searchPlaceholder="Cari departemen..."
+          createLabel="Tambah Department"
+          searchPlaceholder="Cari Department..."
           pageSize={10}
-          emptyMessage={loading ? "Memuat data departemen..." : "Belum ada data departemen."}
+          emptyMessage={loading ? "Memuat data departemen..." : "Belum ada data Department."}
           renderActions={(row) => (
             <>
               <Button variant="outline" size="sm" onClick={() => handleEdit(row)} className="h-8 gap-1.5">

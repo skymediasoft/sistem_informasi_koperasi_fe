@@ -498,8 +498,8 @@ export function MemberForm({
                 className={selectClass(errors.JenisKelamin)}
               >
                 <option value="">Pilih jenis kelamin</option>
-                <option value="PRIA">Laki-laki</option>
-                <option value="WANITA">Perempuan</option>
+                <option value="PRIA">PRIA</option>
+                <option value="WANITA">WANITA</option>
               </select>
             </Field>
 
@@ -707,7 +707,7 @@ export function MemberForm({
             >
               <Save className="size-4" />
 
-              {mode === "create" ? "Simpan anggota" : "Update anggota"}
+              {mode === "create" ? "Save and Close" : "Update anggota"}
             </Button>
           </div>
         </form>

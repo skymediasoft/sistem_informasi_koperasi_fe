@@ -24,8 +24,8 @@ export default function AnggotaPage() {
 
   return (
     <DashboardShell
-      title="Anggota"
-      subtitle="Data anggota koperasi"
+      title="Anggota Jasa"
+      subtitle="Data anggota Jasa"
       displayName={displayName}
       groupName={user?.groupName || "Koperasi"}
       initials={initials}

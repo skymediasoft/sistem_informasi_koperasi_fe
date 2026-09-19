@@ -297,8 +297,8 @@ const handleDelete = async (row: AnggotaPayload) => {
 
   return (
     <DashboardShell
-      title="Anggota"
-      subtitle="Data anggota koperasi"
+      title="Kelola Anggota Koperasi"
+      subtitle=""
       displayName={displayName}
       groupName={user?.groupName || "Koperasi"}
       initials={initials}
@@ -431,7 +431,7 @@ const handleDelete = async (row: AnggotaPayload) => {
           onCreate={handleCreate}
           onEdit={handleEdit}
           onDelete={handleDelete}
-          createLabel="Create New Data"
+          createLabel="Tambah Anggota Baru"
           searchPlaceholder="Cari anggota..."
           pageSize={5}
           renderActions={(row) => (
