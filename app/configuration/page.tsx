@@ -1,99 +1,137 @@
 "use client";
 
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { FileCog, Settings2, SlidersHorizontal } from "lucide-react";
+import { Download, Filter } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DashboardShell } from "@/components/dashboard/app-shell";
 import { useAuth } from "@/lib/auth/auth-context";
-import { getMenuByRole, getSessionFromStorage, secondaryMenu } from "@/lib/auth/navigation";
+import { getMenuByRole } from "@/lib/auth/navigation";
 
-export default function ConfigurationPage() {
-  const router = useRouter();
+const formatRupiah = (value: number) =>
+  new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    maximumFractionDigits: 0,
+  }).format(value);
+const savings = [
+  ["Simpanan wajib", 2054725000],
+  ["Simpanan sukarela", 2471760000],
+  ["Simpanan pokok", 45735000],
+];
+const profit = [
+  ["Kredit kendaraan", 1003006654, 161428938],
+  ["Kredit", 1118373773, 214311269],
+  ["Kredit sembako", 111777000, 11177700],
+];
+export default function ReportsPage() {
   const { logout, user } = useAuth();
-
-  useEffect(() => {
-    const savedSession = getSessionFromStorage();
-    if (!savedSession) router.replace("/login");
-  }, [router]);
-
-  const role = user?.role ?? "administrator";
-  const menu = getMenuByRole(role);
-  const displayName = user?.name || "Administrator Koperasi";
-  const initials = user?.name ? user.name.split(" ").map((part) => part[0]).join("").slice(0, 2).toUpperCase() : "AD";
+  const menu = getMenuByRole(user?.role ?? "administrator", user?.menus);
 
   return (
     <DashboardShell
-      title="Configuration"
-      subtitle="Setting utama aplikasi koperasi"
-      displayName={displayName}
+      title="Pusat laporan"
+      subtitle="Laporan & akuntansi"
+      displayName={user?.name || "Administrator Koperasi"}
       groupName={user?.groupName || "Koperasi"}
-      initials={initials}
       menu={menu}
-      secondaryMenu={secondaryMenu}
       onLogout={logout}
-      actionLabel="Simpan config"
-      onAction={() => undefined}
     >
-      <div className="grid gap-4 md:grid-cols-3">
-        <MetricCard icon={Settings2} label="Simpanan" value="Aktif" />
-        <MetricCard icon={SlidersHorizontal} label="Pinjaman" value="Aktif" />
-        <MetricCard icon={FileCog} label="Formulir" value="11 template" />
+      <div className="mb-6 px-4 py-2 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="text-sm text-muted-foreground">
+            Analisis performa koperasi berdasarkan periode yang dipilih.
+          </p>
+        </div>
+        <Button variant="outline">
+          <Download data-icon="inline-start" /> Export laporan
+        </Button>
       </div>
-
-      <div className="mt-6 grid gap-6 xl:grid-cols-2">
-        <Card className="rounded-2xl">
+      <Card className="px-4 py-2">
+        <CardHeader>
+          <CardTitle className="text-base">Filter laporan</CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-4 sm:flex-row sm:items-end">
+          <label className="grid flex-1 gap-2 text-sm font-medium">
+            Tanggal mulai
+            <input
+              type="date"
+              defaultValue="2026-01-01"
+              className="h-9 rounded-lg border bg-background px-3 text-sm"
+            />
+          </label>
+          <label className="grid flex-1 gap-2 text-sm font-medium">
+            Tanggal akhir
+            <input
+              type="date"
+              defaultValue="2026-08-29"
+              className="h-9 rounded-lg border bg-background px-3 text-sm"
+            />
+          </label>
+          <Button>
+            <Filter data-icon="inline-start" /> Tampilkan
+          </Button>
+        </CardContent>
+      </Card>
+      <div className="mt-6 grid gap-6 lg:grid-cols-2">
+        <Card className="px-4 py-2">
           <CardHeader>
-            <CardTitle>Konfigurasi umum</CardTitle>
+            <CardTitle className="text-base">
+              Laporan simpanan anggota
+            </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3 text-sm text-muted-foreground">
-            {[
-              "Setting simpanan wajib",
-              "Setting pinjaman & kredit",
-              "Setting jenis jasa",
-              "Setting formulir dokumen",
-            ].map((item) => (
-              <div key={item} className="rounded-xl bg-secondary p-3">
-                {item}
-              </div>
-            ))}
+          <CardContent>
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-105 text-sm">
+                <tbody>
+                  {savings.map(([name, value]) => (
+                    <tr key={name as string} className="border-b">
+                      <td className="py-3">{name}</td>
+                      <td className="py-3 text-right font-medium">
+                        {formatRupiah(value as number)}
+                      </td>
+                    </tr>
+                  ))}
+                  <tr className="font-semibold">
+                    <td className="pt-4">Total simpanan</td>
+                    <td className="pt-4 text-right">Rp 4.572.220.000</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </CardContent>
         </Card>
-
-        <Card className="rounded-2xl">
+        <Card className="px-3 py-2">
           <CardHeader>
-            <CardTitle>Daftar status</CardTitle>
+            <CardTitle className="text-base">Ringkasan profit</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3 text-sm text-muted-foreground">
-            {[
-              "Simpanan aktif",
-              "Pinjaman aktif",
-              "Jasa aktif",
-              "Formulir siap dipakai",
-            ].map((item) => (
-              <div key={item} className="rounded-xl bg-secondary p-3">
-                {item}
-              </div>
-            ))}
+          <CardContent>
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[480px] text-sm">
+                <thead>
+                  <tr className="border-b text-left text-muted-foreground">
+                    <th className="py-3">Jenis transaksi</th>
+                    <th className="text-right">Tagihan</th>
+                    <th className="text-right">Profit</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {profit.map(([name, bill, value]) => (
+                    <tr key={name as string} className="border-b">
+                      <td className="py-3">{name}</td>
+                      <td className="text-right">
+                        {formatRupiah(bill as number)}
+                      </td>
+                      <td className="text-right font-medium">
+                        {formatRupiah(value as number)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </CardContent>
         </Card>
       </div>
     </DashboardShell>
-  );
-}
-
-function MetricCard({ icon: Icon, label, value }: { icon: any; label: string; value: string }) {
-  return (
-    <Card className="rounded-2xl">
-      <CardContent className="flex items-center justify-between gap-3 p-5">
-        <div>
-          <p className="text-sm text-muted-foreground">{label}</p>
-          <p className="mt-3 text-xl font-semibold">{value}</p>
-        </div>
-        <div className="flex size-11 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-          <Icon className="size-5" />
-        </div>
-      </CardContent>
-    </Card>
   );
 }

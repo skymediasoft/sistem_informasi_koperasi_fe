@@ -140,24 +140,17 @@ export type UpdateGroupPayload = {
   groupName: string;
 };
 
-export type User = {
+export type User = {  
   id?: string | number;
-  userId?: string | number;
   UserId?: string | number;
-  userlogin?: string;
-  userLogin?: string;
   UserLogin?: string;
-  username?: string;
-  userName?: string;
   UserName?: string;
-  email?: string;
-  userEmail?: string;
   UserEmail?: string;
-  postBy?: string;
-  postDate?: string | number;
-  groupId?: string | number;
-  group_id?: string | number;
+  PostBy?: string;
+  PostDate?: string | number;
   GroupId?: string | number;
+  GroupName?: string;
+  groupName?: string;
 };
 
 export type RegisterUserPayload = {
@@ -244,4 +237,86 @@ export const userApi = {
   resetpassword: (userlogin: string, newPassword: string) =>
     handleResponse<{ message: string }>(api.patch("/auth/admin-reset-password", { userlogin, newPassword })),
   delete: (userId: string) => handleResponse<void>(api.delete(`/auth/users/${userId}`)),
+};
+
+
+export const SettingSimpananApi = {
+  findAll: () => handleResponse<SettingSimpanan[]>(api.get("/setting-simpanan")),
+  update: (id: number, setting: CreateSimpananPayload) =>
+    handleResponse<unknown>(api.patch(`/setting-simpanan/${id}`, setting)),
+  updateApply: (setting: CreateSimpananPayload) =>
+    handleResponse<unknown>(api.post("/setting-simpanan/update-apply", setting)),
+};
+
+export type SettingSimpanan = {
+  ID: number;
+  SimpananPokok?: number;
+  SimpananWajib?: number;
+  SimpananSukarela?: number;
+  jenisTransaksi?: string;
+  tagihan?: number;
+  profit?: number;
+};
+export type UpdateSimpananPayload = {
+  ID: number;
+  SimpananPokok: number;
+  SimpananWajib: number;
+  SimpananSukarela: number;
+};
+
+export type CreateSimpananPayload = {
+  SimpananPokok: number;
+  SimpananWajib: number;
+  SimpananSukarela: number;
+};
+
+export type AnggotaPayload = {
+        NoAnggota: number,
+        NoEmployee: string,
+        Nama: string,
+        Alamat: string,
+        Telpon: string,
+        JenisKelamin: string,
+        DepartmentId: number,
+        DepartmentName: string,
+        JenisAnggota: string,
+        TanggalMasuk: Date,
+        NoRekening: string,
+        SimpananPokok: number,
+        SimpananWajib: number,
+        SimpananSukarela: number,
+        AlamatEmail: string,
+        StatusAnggota: string,
+        CreatedUser: string,
+};
+
+
+export type AnggotaCreatePayload = {
+  NoEmployee: string;
+  Nama: string;
+  Alamat: string;
+  Telpon: string;
+  JenisKelamin: string;
+  DepartmentId: number;
+  JenisAnggota: string;
+  TanggalMasuk: string;
+  NoRekening: string;
+  SimpananPokok: number;
+  SimpananWajib: number;
+  SimpananSukarela: number;
+  AlamatEmail: string;
+  StatusAnggota: string;
+};
+
+export const anggotaApi = {
+  findAll: () => handleResponse<AnggotaPayload[]>(api.get("/anggota-auth/all")),
+findOne: (NoAnggota: string) =>
+  handleResponse<AnggotaPayload>(
+    api.get(`/anggota-auth/${encodeURIComponent(NoAnggota)}`)
+  ),
+  create: (anggota: AnggotaCreatePayload) =>
+    handleResponse<AnggotaPayload>(api.post("/anggota-auth/register", anggota)),
+  update: (NoAnggota: string, anggota: AnggotaCreatePayload) =>
+    handleResponse<{ message: string }>(api.patch(`/anggota-auth/update/${encodeURIComponent(NoAnggota)}`, anggota)),
+  delete: (NoAnggota: string) => handleResponse<void>(api.delete(`/anggota-auth/delete/${encodeURIComponent(NoAnggota)}`)),
 };

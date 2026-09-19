@@ -153,6 +153,7 @@ export default function DefineMenuPage() {
   };
 
   const addParentForm = () => {
+    setSelectedParentId("");
     setFormMode("parent");
     setEditingMenuId(null);
     setMenuName("");

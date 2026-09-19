@@ -1,67 +1,112 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { UserRoundCog } from "lucide-react";
 
-import { MemberForm, type MemberFormValues } from "@/components/forms/anggota-form";
+import { MemberForm } from "@/components/forms/anggota-form";
 import { DashboardShell } from "@/components/dashboard/app-shell";
+import { showAlert } from "@/lib/alert";
+import { anggotaApi, AnggotaCreatePayload, type AnggotaPayload } from "@/lib/api";
 import { useAuth } from "@/lib/auth/auth-context";
-import { getMenuByRole, getSessionFromStorage, secondaryMenu } from "@/lib/auth/navigation";
-
-const anggotaSeed: MemberFormValues[] = [
-  {
-    memberId: "KPR-2024-001",
-    name: "Budi Santoso",
-    email: "budi.santoso@example.com",
-    phone: "081234567890",
-    departemen: "Keuangan",
-    status: "Aktif",
-    joinDate: "2024-01-15",
-    address: "Jl. Merdeka No. 12, Bandung",
-  },
-  {
-    memberId: "KPR-2024-002",
-    name: "Siti Aminah",
-    email: "siti.aminah@example.com",
-    phone: "081233445566",
-    departemen: "Simpanan & Pinjaman",
-    status: "Baru",
-    joinDate: "2024-02-10",
-    address: "Jl. Cikutra No. 22, Bandung",
-  },
-  {
-    memberId: "KPR-2024-003",
-    name: "Andi Wijaya",
-    email: "andi.wijaya@example.com",
-    phone: "081287654321",
-    departemen: "Anggota & Pelayanan",
-    status: "Review",
-    joinDate: "2023-12-21",
-    address: "Jl. Setiabudi No. 7, Bandung",
-  },
-];
+import { getMenuByRole, secondaryMenu } from "@/lib/auth/navigation";
 
 export default function EditAnggotaPage() {
   const router = useRouter();
-  const params = useParams<{ memberId?: string }>();
   const { logout, user } = useAuth();
 
+  const params = useParams<{ memberId?: string }>();
+
   const memberId = params?.memberId ?? "";
-  const selectedMember = useMemo(
-    () => anggotaSeed.find((item) => item.memberId === memberId) ?? anggotaSeed[0],
-    [memberId]
-  );
+  const [memberData, setMemberData] = useState<AnggotaPayload | null>(null);
+  const [loading, setLoading] = useState(true);
+
+useEffect(() => {
+  if (!memberId) {
+    setLoading(false);
+    return;
+  }
+
+  const fetchMember = async () => {
+    try {
+      setLoading(true);
+
+      const response = await anggotaApi.findOne(memberId);
+
+      console.log("DETAIL ANGGOTA:", response);
+
+      setMemberData(response);
+    } catch (error) {
+      console.error("GAGAL GET ANGGOTA:", error);
+
+      await showAlert(
+        "danger",
+        error instanceof Error
+          ? error.message
+          : "Gagal memuat detail anggota.",
+      );
+
+      router.push("/data-karyawan/anggota");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  void fetchMember();
+}, [memberId, router]);
+
+  const selectedMember = useMemo(() => {
+    if (!memberData) return undefined;
+
+    return {
+      NoEmployee: memberData.NoEmployee ?? "",
+      Nama: memberData.Nama ?? "",
+      Alamat: memberData.Alamat ?? "",
+      Telpon: memberData.Telpon ?? "",
+      JenisKelamin: memberData.JenisKelamin ?? "",
+      DepartmentId: Number(memberData.DepartmentId ?? 0),
+      JenisAnggota: memberData.JenisAnggota ?? "",
+      TanggalMasuk: memberData.TanggalMasuk ? String(memberData.TanggalMasuk).slice(0, 10) : new Date().toISOString().slice(0, 10),
+      NoRekening: memberData.NoRekening ?? "",
+      SimpananPokok: Number(memberData.SimpananPokok ?? 0),
+      SimpananWajib: Number(memberData.SimpananWajib ?? 0),
+      SimpananSukarela: Number(memberData.SimpananSukarela ?? 0),
+      AlamatEmail: memberData.AlamatEmail ?? "",
+      StatusAnggota: memberData.StatusAnggota ?? "",
+    };
+  }, [memberData]);
 
   const role = user?.role ?? "administrator";
   const menu = getMenuByRole(role);
   const displayName = user?.name || "Administrator Koperasi";
-  const initials = user?.name ? user.name.split(" ").map((part) => part[0]).join("").slice(0, 2).toUpperCase() : "AD";
+  const initials = user?.name
+    ? user.name
+        .split(" ")
+        .map((part) => part[0])
+        .join("")
+        .slice(0, 2)
+        .toUpperCase()
+    : "AD";
 
-  const handleSubmit = (values: MemberFormValues) => {
-    console.log("Update anggota", values);
+const handleSubmit = async (values: AnggotaCreatePayload) => {
+  try {
+    await anggotaApi.update(memberId, values);
+
+    await showAlert(
+      "success",
+      `Anggota "${values.Nama}" berhasil diperbarui.`,
+    );
+
     router.push("/data-karyawan/anggota");
-  };
+  } catch (error) {
+    await showAlert(
+      "danger",
+      error instanceof Error
+        ? error.message
+        : "Gagal memperbarui anggota.",
+    );
+  }
+};
 
   return (
     <DashboardShell
@@ -82,12 +127,18 @@ export default function EditAnggotaPage() {
           <span className="font-medium">Mengubah identitas dan status anggota.</span>
         </div>
 
-        <MemberForm
-          mode="edit"
-          initialValues={selectedMember}
-          onSubmit={handleSubmit}
-          onCancel={() => router.push("/data-karyawan/anggota")}
-        />
+        {!loading && selectedMember ? (
+          <MemberForm
+            mode="edit"
+            initialValues={selectedMember}
+            onSubmit={handleSubmit}
+            onCancel={() => router.push("/data-karyawan/anggota")}
+          />
+        ) : (
+          <div className="rounded-2xl border border-border/70 bg-card p-6 text-sm text-muted-foreground">
+            Memuat data anggota...
+          </div>
+        )}
       </div>
     </DashboardShell>
   );

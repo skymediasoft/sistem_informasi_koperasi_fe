@@ -1,12 +1,13 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { UserRoundPlus } from "lucide-react";
 
-import { MemberForm, type MemberFormValues } from "@/components/forms/anggota-form";
+import { MemberForm} from "@/components/forms/anggota-form";
 import { DashboardShell } from "@/components/dashboard/app-shell";
+import { showAlert } from "@/lib/alert";
+import { anggotaApi, AnggotaCreatePayload } from "@/lib/api";
 import { useAuth } from "@/lib/auth/auth-context";
-import { getMenuByRole, getSessionFromStorage, secondaryMenu } from "@/lib/auth/navigation";
+import { getMenuByRole, secondaryMenu } from "@/lib/auth/navigation";
 
 export default function CreateAnggotaPage() {
   const router = useRouter();
@@ -14,18 +15,66 @@ export default function CreateAnggotaPage() {
 
   const role = user?.role ?? "administrator";
   const menu = getMenuByRole(role);
-  const displayName = user?.name || "Administrator Koperasi";
-  const initials = user?.name ? user.name.split(" ").map((part) => part[0]).join("").slice(0, 2).toUpperCase() : "AD";
 
-  const handleSubmit = (values: MemberFormValues) => {
-    console.log("Create anggota", values);
-    router.push("/data-karyawan/anggota");
+  const displayName = user?.name || "Administrator Koperasi";
+
+  const initials = user?.name
+    ? user.name
+        .split(" ")
+        .map((part) => part[0])
+        .join("")
+        .slice(0, 2)
+        .toUpperCase()
+    : "AD";
+
+  const handleSubmit = async (values: AnggotaCreatePayload) => {
+    try {
+      await anggotaApi.create(values);
+
+      await showAlert(
+        "success",
+        `Anggota "${values.Nama}" berhasil disimpan.`,
+      );
+
+      router.push("/data-karyawan/anggota");
+    } catch (error) {
+      await showAlert(
+        "danger",
+        error instanceof Error
+          ? error.message
+          : "Gagal menyimpan anggota.",
+      );
+    }
+  };
+
+  const handleSaveAndNew = async (
+    values: AnggotaCreatePayload,
+  ): Promise<boolean> => {
+    try {
+      await anggotaApi.create(values);
+
+      await showAlert(
+        "success",
+        `Anggota "${values.Nama}" berhasil disimpan.`,
+      );
+
+      return true;
+    } catch (error) {
+      await showAlert(
+        "danger",
+        error instanceof Error
+          ? error.message
+          : "Gagal menyimpan anggota.",
+      );
+
+      return false;
+    }
   };
 
   return (
     <DashboardShell
       title="Tambah Anggota"
-      subtitle="Form pendaftaran anggota baru"
+      subtitle="Form tambah anggota baru"
       displayName={displayName}
       groupName={user?.groupName || "Koperasi"}
       initials={initials}
@@ -36,12 +85,12 @@ export default function CreateAnggotaPage() {
       onAction={() => router.push("/data-karyawan/anggota")}
     >
       <div className="mx-auto max-w-4xl">
-        <div className="mb-5 flex items-center gap-3 rounded-2xl bg-primary/5 p-4 text-primary">
-          <UserRoundPlus className="size-5" />
-          <span className="font-medium">Isi data anggota baru dengan lengkap.</span>
-        </div>
-
-        <MemberForm mode="create" onSubmit={handleSubmit} onCancel={() => router.push("/data-karyawan/anggota")} />
+        <MemberForm
+          mode="create"
+          onSubmit={handleSubmit}
+          onSaveAndNew={handleSaveAndNew}
+          onCancel={() => router.push("/data-karyawan/anggota")}
+        />
       </div>
     </DashboardShell>
   );

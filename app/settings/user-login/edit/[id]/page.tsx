@@ -21,9 +21,9 @@ const normalizeList = <T,>(payload: unknown): T[] => {
   return [];
 };
 const getUserId = (item: User) => String(
-  item.id ?? item.userId ?? item.UserId ?? item.userLogin ?? item.UserLogin ?? "",
+  item.id ?? item.UserId ?? item.UserLogin ?? "",
 );
-const getUserGroupId = (item: User) => String(item.groupId ?? item.group_id ?? item.GroupId ?? "");
+const getUserGroupId = (item: User) => String( item.GroupId ?? "");
 
 export default function EditUserPage() {
   const router = useRouter();
@@ -44,7 +44,7 @@ export default function EditUserPage() {
         const loadedGroups = normalizeList<Group>(groupsPayload);
         if (!userRecord) throw new Error("User tidak ditemukan.");
         setGroups(loadedGroups);
-        setSelectedUser({ userlogin: userRecord.userlogin ?? userRecord.userLogin ?? userRecord.UserLogin ?? "", username: userRecord.username ?? userRecord.userName ?? userRecord.UserName ?? "", email: userRecord.userEmail ?? userRecord.email ?? userRecord.UserEmail ?? "", groupId: getUserGroupId(userRecord), password: "123456" });
+        setSelectedUser({ userlogin:  userRecord.UserLogin ?? "", username: userRecord.UserName ?? "", email: userRecord.UserEmail ?? "", groupId: getUserGroupId(userRecord), password: "123456" });
       } catch (requestError) {
         await showAlert("danger", requestError instanceof Error ? requestError.message : "Gagal memuat group.");
         router.push("/settings/user-login");
