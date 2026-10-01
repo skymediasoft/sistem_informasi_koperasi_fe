@@ -320,3 +320,40 @@ findOne: (NoAnggota: string) =>
     handleResponse<{ message: string }>(api.patch(`/anggota-auth/update/${encodeURIComponent(NoAnggota)}`, anggota)),
   delete: (NoAnggota: string) => handleResponse<void>(api.delete(`/anggota-auth/delete/${encodeURIComponent(NoAnggota)}`)),
 };
+
+//get 
+export type TransaksiSimpanan = {
+  NoAnggota: number,
+  NoEmployee: string,
+  Nama: string,
+     SimpananPokok: number,
+        SimpananWajib: number,
+        SimpananSukarela: number,
+        Total: number,
+}
+
+
+
+
+//post
+export type PostingTransakasiSimpananPayload = {
+IDTransaksi: string;
+  Tanggal: string;
+    TotalAnggota: number;
+    TotalSimpananPokok: number;
+    TotalSimpananWajib: number;
+    TotalSimpananSukarela: number;
+    TotalSimpanan: number;
+}
+
+
+
+
+export const TransaksiSimpananAPI = {
+  findAll: () =>
+    handleResponse<TransaksiSimpanan[]>(api.get("/transaksi-simpanan")),
+  postingSimpanan: (payload: PostingTransakasiSimpananPayload) =>
+    handleResponse<string | { message?: string }>(
+      api.post("/transaksi-simpanan/submit-posting", payload),
+    ),
+};
