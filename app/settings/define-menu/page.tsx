@@ -66,7 +66,7 @@ const buildEditorMenus = (rawMenus: unknown): MenuEditorRow[] => {
 };
 
 export default function DefineMenuPage() {
-  const { logout, user } = useAuth();
+  const { logout, user, refreshSession } = useAuth();
   const [menuData, setMenuData] = useState<MenuEditorRow[]>([]);
   const [selectedParentId, setSelectedParentId] = useState("");
   const [formMode, setFormMode] = useState<"parent" | "child">("child");
@@ -153,6 +153,7 @@ export default function DefineMenuPage() {
   };
 
   const addParentForm = () => {
+    setSelectedParentId("");
     setFormMode("parent");
     setEditingMenuId(null);
     setMenuName("");
@@ -195,6 +196,7 @@ export default function DefineMenuPage() {
     try {
       await menuApi.delete(menuId);
       await loadMenus();
+      await refreshSession();
       resetForm();
       await showAlert("success", "Data menu berhasil dihapus.");
     } catch (error) {
@@ -235,6 +237,7 @@ export default function DefineMenuPage() {
       if (editingMenuId) {
         await menuApi.update(editingMenuId, payload);
         await loadMenus();
+        await refreshSession();
         await showAlert("success", "Data menu berhasil diperbarui.");
       } else {
         await menuApi.create({
@@ -243,6 +246,7 @@ export default function DefineMenuPage() {
           postBy: user.id,
         });
         await loadMenus();
+        await refreshSession();
         await showAlert("success", "Data menu berhasil disimpan.");
       }
       resetForm();

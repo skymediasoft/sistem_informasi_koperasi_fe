@@ -6,6 +6,19 @@ import { DashboardLayout as ShellLayout } from "@/components/dashboard/app-shell
 import { useAuth } from "@/lib/auth/auth-context";
 import { getMenuByRole } from "@/lib/auth/navigation";
 
+const groupNames: Record<number, string> = {
+  0: "Anggota",
+  1: "Administrator",
+  2: "Admin Koperasi",
+  3: "Pengurus Koperasi",
+};
+
+const getGroupName = (groupId: number | string | null | undefined) => {
+  const normalizedGroupId = Number(groupId);
+
+  return groupNames[normalizedGroupId] ?? "Koperasi";
+};
+
 const publicPaths = new Set(["/", "/login", "/admin"]);
 
 export function DashboardLayout({
@@ -23,7 +36,7 @@ export function DashboardLayout({
   return (
     <ShellLayout
       displayName={user.name}
-      groupName={user.groupName || "Koperasi"}
+      groupName={getGroupName(user.groupId)}
       menu={getMenuByRole(user.role, user.menus)}
       onLogout={logout}
     >

@@ -12,8 +12,9 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   images: {
-    unoptimized: true,
+    unoptimized: true,    
   },
+  allowedDevOrigins: ["192.168.1.12"],
 };
 
 export default withSerwist(nextConfig);

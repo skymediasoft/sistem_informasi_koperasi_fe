@@ -7,7 +7,7 @@ import { DashboardShell } from "@/components/dashboard/app-shell";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { showAlert } from "@/lib/alert";
-import { groupApi, groupMenuAuthApi, type Group } from "@/lib/api";
+import { groupApi, groupMenuAuthApi, menuApi, type Group } from "@/lib/api";
 import { useAuth } from "@/lib/auth/auth-context";
 import { getMenuByRole } from "@/lib/auth/navigation";
 import type { ApiMenuNode } from "@/lib/auth/types";
@@ -118,18 +118,20 @@ const flattenMenus = (menus: ApiMenuNode[]) =>
 	menus.flatMap((parent) => [parent, ...(parent.children ?? [])]);
 
 export default function DefineMenuAuthorizationPage() {
-	const { logout, user } = useAuth();
+	const { logout, user, refreshSession } = useAuth();
 	const [checkedMenus, setCheckedMenus] = useState<Set<string>>(new Set());
 	const [groups, setGroups] = useState<Group[]>([]);
+	const [menuTree, setMenuTree] = useState<ApiMenuNode[]>([]);
 	const [selectedGroupId, setSelectedGroupId] = useState("");
 	const [isLoadingGroups, setIsLoadingGroups] = useState(false);
+	const [isLoadingMenuTree, setIsLoadingMenuTree] = useState(false);
 	const [isLoadingAuthorization, setIsLoadingAuthorization] = useState(false);
 	const [isSaving, setIsSaving] = useState(false);
 	const [errorMessage, setErrorMessage] = useState("");
 
 	const role = user?.role ?? "administrator";
-	const navigationMenu = getMenuByRole(role, user?.menus);
-	const parentMenus = user?.menus ?? [];
+	const parentMenus = menuTree.length > 0 ? menuTree : user?.menus ?? [];
+	const navigationMenu = getMenuByRole(role, parentMenus);
 	const displayName = user?.name || "Administrator Koperasi";
 
 	useEffect(() => {
@@ -161,7 +163,27 @@ export default function DefineMenuAuthorizationPage() {
 			}
 		};
 
+		const loadMenuTree = async () => {
+			setIsLoadingMenuTree(true);
+			try {
+				const parents = await menuApi.findAllParent();
+				const nextMenus = await Promise.all(
+				parents.map(async (parent) => ({
+					...parent,
+					children: await menuApi.findAllChild(menuKey(parent)),
+				})),
+				);
+				setMenuTree(nextMenus);
+			} catch (error) {
+				console.error("Menu tree load failed:", error);
+				setMenuTree(user?.menus ?? []);
+			} finally {
+				setIsLoadingMenuTree(false);
+			}
+		};
+
 		void loadGroups();
+		void loadMenuTree();
 	}, [user]);
 
 	useEffect(() => {
@@ -270,6 +292,7 @@ export default function DefineMenuAuthorizationPage() {
 					access: checkedMenus.has(menuKey(menu)) ? 1 : 0,
 				})),
 			);
+			await refreshSession();
 			await showAlert("success", "Authorization berhasil disimpan.");
 		} catch (error) {
 			const message = error instanceof Error ? error.message : "Authorization gagal disimpan.";

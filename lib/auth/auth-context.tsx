@@ -651,16 +651,22 @@ export function AuthProvider({
           }
 
           /**
-           * STEP 1
            * Login.
            */
 
-          const response =
-            await authApi.login(
+          let response;
+
+          try {
+            response = await authApi.login(
               normalizedIdentifier,
               password,
             );
-
+          } catch {
+            response = await authApi.anggotaLogin(
+              normalizedIdentifier,
+              password,
+            );
+          }
           const accessToken =
             response?.access_token ??
             response?.accessToken;

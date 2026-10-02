@@ -25,13 +25,24 @@ export const authApi = {
     return res.data;
   },
 
+anggotaLogin: async (userlogin: string, password: string) => {
+    const res = await axios.post(`${api_base_url}/anggota-auth/login`, { userlogin, password }, {
+      headers: buildHeaders(),
+      withCredentials: false,
+    });
+        console.log("anggotaLogin response:", res); 
+    return res.data;
+
+  },
+
+
   login: async (userlogin: string, password: string) => {
     const res = await axios.post(`${api_base_url}/auth/login`, { userlogin, password }, {
       headers: buildHeaders(),
       withCredentials: false,
     });
 
-    console.log("authApi.login response:", res.data); // Log the response data for debugging
+     // Log the response data for debugging
     return res.data;
   },
 
