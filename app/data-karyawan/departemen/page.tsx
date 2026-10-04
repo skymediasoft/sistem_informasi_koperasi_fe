@@ -24,6 +24,8 @@ const formatTanggal = (timestamp: number) =>
         day: "numeric",
         month: "long",
         year: "numeric",
+        minute: "2-digit",
+        hour: "2-digit",
       }).format(new Date(timestamp))
     : "-";
 
@@ -35,11 +37,8 @@ export default function DepartemenPage() {
   const [error, setError] = useState<string | null>(null);
 
   const role = user?.role ?? "administrator";
-  const menu = getMenuByRole(
-    role,
-    user?.menus,
-  );
- 
+  const menu = getMenuByRole(role, user?.menus);
+
   const displayName = user?.name || "Administrator Koperasi";
 
   const loadDepartments = async () => {
@@ -84,11 +83,12 @@ export default function DepartemenPage() {
       { key: "PostBy", header: "Post By", accessor: (row: DepartemenRow) => row.createdUser },
       { key: "PostDate", header: "Post Date", accessor: (row: DepartemenRow) => formatTanggal(row.createdDate) },
     ],
-    []
+    [],
   );
 
   const handleCreate = () => router.push("/data-karyawan/departemen/create");
-  const handleEdit = (row: DepartemenRow) => router.push(`/data-karyawan/departemen/edit/${row.Deptid}`);
+  const handleEdit = (row: DepartemenRow) =>
+    router.push(`/data-karyawan/departemen/edit/${row.Deptid}`);
   const handleDelete = async (row: DepartemenRow) => {
     const result = await showConfirm(`Data Department "${row.Departemen}" akan dihapus.`);
 
@@ -120,7 +120,11 @@ export default function DepartemenPage() {
       {error ? (
         <div className="mb-4 flex flex-col gap-3 rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive sm:flex-row sm:items-center sm:justify-between">
           <span>{error}</span>
-          <Button variant="outline" size="sm" onClick={() => void loadDepartments()}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => void loadDepartments()}
+          >
             <RefreshCw className="size-4" />
             Coba lagi
           </Button>
@@ -141,11 +145,21 @@ export default function DepartemenPage() {
           emptyMessage={loading ? "Memuat data departemen..." : "Belum ada data Department."}
           renderActions={(row) => (
             <>
-              <Button variant="outline" size="sm" onClick={() => handleEdit(row)} className="h-8 gap-1.5">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleEdit(row)}
+                className="h-8 gap-1.5"
+              >
                 <Edit className="size-3.5" />
                 Edit
               </Button>
-              <Button variant="destructive" size="sm" onClick={() => handleDelete(row)} className="h-8 gap-1.5">
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={() => handleDelete(row)}
+                className="h-8 gap-1.5"
+              >
                 <Trash2 className="size-3.5" />
                 Delete
               </Button>
