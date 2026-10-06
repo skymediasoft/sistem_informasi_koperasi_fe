@@ -52,12 +52,6 @@ export default function CreateAnggotaPage() {
   ): Promise<boolean> => {
     try {
       await anggotaApi.create(values);
-
-      await showAlert(
-        "success",
-        `Anggota "${values.Nama}" berhasil disimpan.`,
-      );
-
       return true;
     } catch (error) {
       await showAlert(

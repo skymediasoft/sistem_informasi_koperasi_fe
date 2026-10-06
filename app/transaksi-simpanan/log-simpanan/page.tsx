@@ -18,6 +18,7 @@ import {
 } from "@/lib/auth/navigation";
 
 import { TransaksiSimpananAPI, type TransaksiSimpanan } from "@/lib/api";
+
 import { showAlert, showConfirm } from "@/lib/alert";
 
 export default function LogSimpananPage() {
@@ -47,6 +48,7 @@ export default function LogSimpananPage() {
       setError(null);
 
       const transaksi = await TransaksiSimpananAPI.findAll();
+
       setTransaksiData(transaksi ?? []);
     } catch (err) {
       console.error("Gagal mengambil data transaksi simpanan:", err);
@@ -100,7 +102,8 @@ export default function LogSimpananPage() {
       {
         key: "SimpananSukarela",
         header: "Simpanan Sukarela",
-        accessor: (row: TransaksiSimpanan) => formatRupiah(row.SimpananSukarela),
+        accessor: (row: TransaksiSimpanan) =>
+          formatRupiah(row.SimpananSukarela),
       },
       {
         key: "Total",
@@ -108,63 +111,87 @@ export default function LogSimpananPage() {
         accessor: (row: TransaksiSimpanan) => formatRupiah(row.Total),
       },
     ],
-    []
+    [],
   );
+
+  /**
+* Semua total di bawah ini HANYA untuk display.
+* Total Nilainya berasal dari hasil GET findAll().
+  */
+  const totalAnggota = transaksiData.length;
 
   const totalSimpanan = transaksiData.reduce(
     (total, item) => total + Number(item.Total || 0),
-    0
+    0,
   );
+
   const totalSimpananPokok = transaksiData.reduce(
     (total, item) => total + Number(item.SimpananPokok || 0),
-    0
+    0,
   );
+
   const totalSimpananWajib = transaksiData.reduce(
     (total, item) => total + Number(item.SimpananWajib || 0),
-    0
+    0,
   );
+
   const totalSimpananSukarela = transaksiData.reduce(
     (total, item) => total + Number(item.SimpananSukarela || 0),
-    0
+    0,
   );
+
   const submitPosting = async () => {
-    if (!postingDate || transaksiData.length === 0) return;
+    if (!postingDate) {
+      await showAlert("warning", "Tanggal posting wajib dipilih.");
+      return;
+    }
 
     const confirmation = await showConfirm(
-      `Posting ${transaksiData.length.toLocaleString("id-ID")} anggota dengan total simpanan ${formatRupiah(totalSimpanan)} pada tanggal ${postingDate}?`,
+      `Lakukan posting simpanan untuk tanggal ${postingDate}?`,
       "Konfirmasi posting simpanan",
     );
+
     if (!confirmation.isConfirmed) return;
 
     try {
       setSubmitting(true);
-      const transaksiId = `SP-${postingDate.replaceAll("-", "")}-${Date.now()}`;
+      setError(null);
+
+      /**
+       * HANYA kirim tanggal.
+       *
+       * IDTransaksi, TotalAnggota,
+       * TotalSimpananPokok, TotalSimpananWajib,
+       * TotalSimpananSukarela, dan TotalSimpanan
+       * dihitung/dibuat oleh Stored Procedure.
+       */
       const result = await TransaksiSimpananAPI.postingSimpanan({
-        IDTransaksi: transaksiId,
         Tanggal: postingDate,
-        TotalAnggota: transaksiData.length,
-        TotalSimpananPokok: totalSimpananPokok,
-        TotalSimpananWajib: totalSimpananWajib,
-        TotalSimpananSukarela: totalSimpananSukarela,
-        TotalSimpanan: totalSimpanan,
       });
 
-      const message = typeof result === "string" ? result : result?.message;
+      const message =
+        typeof result === "string"
+          ? result
+          : result?.message;
+
       if (message?.startsWith("Error ")) {
         throw new Error(message);
       }
 
-      await showAlert(
-        "success",
-        message || "Posting simpanan berhasil.",
-      );
+      await showAlert("success", message || "Posting simpanan berhasil.");
+
+      /**
+       * Setelah posting berhasil:
+       * GET ulang data untuk mengambil data terbaru.
+       *
+       * Total card dan tabel akan ikut menggunakan
+       * data hasil GET terbaru.
+       */
       await fetchTransaksi();
     } catch (err) {
       console.error("Gagal melakukan posting simpanan:", err);
-      await showAlert(
-        "danger",
-        getPostingErrorMessage(err),
-      );
+
+      await showAlert("danger", getPostingErrorMessage(err));
     } finally {
       setSubmitting(false);
     }
@@ -181,32 +208,41 @@ export default function LogSimpananPage() {
       secondaryMenu={secondaryMenu}
       onLogout={logout}
     >
+      {" "}
       <div className="mb-6">
+        {" "}
         <div className="mb-3 flex items-center gap-2">
+          {" "}
           <Wallet className="size-4 text-primary" />
-          <h2 className="text-base font-semibold">Ringkasan transaksi simpanan</h2>
+          <h2 className="text-base font-semibold">
+            Ringkasan transaksi simpanan
+          </h2>
         </div>
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
           <MetricCard
             icon={Users}
             label="Total Anggota"
-            value={loading ? "..." : transaksiData.length.toLocaleString("id-ID")}
+            value={loading ? "..." : totalAnggota.toLocaleString("id-ID")}
           />
+
           <MetricCard
             icon={Wallet}
             label="Total Simpanan Pokok"
             value={loading ? "..." : formatRupiah(totalSimpananPokok)}
           />
+
           <MetricCard
             icon={Wallet}
             label="Total Simpanan Wajib"
             value={loading ? "..." : formatRupiah(totalSimpananWajib)}
           />
+
           <MetricCard
             icon={Wallet}
             label="Total Simpanan Sukarela"
             value={loading ? "..." : formatRupiah(totalSimpananSukarela)}
           />
+
           <MetricCard
             icon={Wallet}
             label="Total Simpanan"
@@ -218,6 +254,7 @@ export default function LogSimpananPage() {
             Tanggal Posting
             <span className="relative">
               <CalendarDays className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+
               <input
                 type="date"
                 value={postingDate}
@@ -227,9 +264,10 @@ export default function LogSimpananPage() {
               />
             </span>
           </label>
+
           <Button
             onClick={() => void submitPosting()}
-            disabled={loading || submitting || transaksiData.length === 0 || !postingDate}
+            disabled={loading || submitting || !postingDate}
             className="h-10 gap-2"
           >
             {submitting ? (
@@ -237,11 +275,11 @@ export default function LogSimpananPage() {
             ) : (
               <Send className="size-4" />
             )}
+
             {submitting ? "Memposting..." : "Posting Simpanan"}
           </Button>
         </div>
       </div>
-
       <div className="mt-6">
         {error && (
           <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
@@ -258,13 +296,16 @@ export default function LogSimpananPage() {
             </div>
           </div>
         )}
+
         <DataTable
           title="Transaksi simpanan anggota"
           subtitle=""
           data={transaksiData}
           columns={columns}
           searchPlaceholder="Cari transaksi.."
-          emptyMessage={loading ? "Memuat data transaksi..." : "Belum ada data transaksi."}
+          emptyMessage={
+            loading ? "Memuat data transaksi..." : "Belum ada data transaksi."
+          }
           pageSize={10}
         />
       </div>
@@ -274,18 +315,21 @@ export default function LogSimpananPage() {
 
 function formatRupiah(value: number | string | null | undefined) {
   const amount = Number(value || 0);
+
   return `Rp ${Number.isFinite(amount) ? amount.toLocaleString("id-ID") : "0"}`;
 }
 
 function getLocalDateValue() {
   const now = new Date();
   const offset = now.getTimezoneOffset() * 60_000;
+
   return new Date(now.getTime() - offset).toISOString().slice(0, 10);
 }
 
 function getPostingErrorMessage(error: unknown) {
   if (isAxiosError(error)) {
     const responseBody = error.response?.data;
+
     console.error("Respons error posting simpanan:", {
       status: error.response?.status,
       body: responseBody,
@@ -301,10 +345,16 @@ function getPostingErrorMessage(error: unknown) {
         p_Message?: string;
         error?: string;
       };
+
       const message = body.p_Message ?? body.message ?? body.error;
 
-      if (Array.isArray(message)) return message.join(" ");
-      if (message) return message;
+      if (Array.isArray(message)) {
+        return message.join(" ");
+      }
+
+      if (message) {
+        return message;
+      }
     }
   }
 
@@ -324,15 +374,14 @@ function MetricCard({
 }) {
   return (
     <Card className="rounded-2xl">
+      {" "}
       <CardContent className="flex items-center justify-between gap-3 p-5">
+        {" "}
         <div>
-          <p className="text-sm text-muted-foreground">{label}</p>
-
-          <p className="mt-3 text-xl font-semibold">
-            {value}
-          </p>
+          {" "}
+          <p className="text-sm text-muted-foreground">{label} </p>
+          <p className="mt-3 text-xl font-semibold">{value}</p>
         </div>
-
         <div className="flex size-11 items-center justify-center rounded-2xl bg-primary/10 text-primary">
           <Icon className="size-5" />
         </div>
@@ -340,4 +389,3 @@ function MetricCard({
     </Card>
   );
 }
-

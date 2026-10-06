@@ -120,9 +120,6 @@ export default function CreateAnggotaPage() {
   const handleSaveAndNew = async (values: AnggotaCreatePayload) => {
     try {
       await anggotaApi.create(values);
-
-      await showAlert("success", `Anggota "${values.Nama}" berhasil disimpan.`);
-
       return true;
     } catch (requestError) {
       await showAlert(
@@ -200,6 +197,8 @@ export function MemberForm({
   const [loadingDepartment, setLoadingDepartment] = React.useState(true);
 
   const [loadingSetting, setLoadingSetting] = React.useState(true);
+
+  const [savingAndNew, setSavingAndNew] = React.useState(false);
 
   const toNumber = (value: unknown) => {
     const parsed = Number(value);
@@ -413,21 +412,31 @@ export function MemberForm({
   const handleSaveAndNew = async () => {
     const values = validateForm();
 
-    if (!values || !onSaveAndNew) {
+    if (!values || !onSaveAndNew || savingAndNew) {
       return;
     }
 
-    const saved = await onSaveAndNew(values);
+    setSavingAndNew(true);
 
-    if (saved) {
-      setForm({
-        ...defaultValues,
-        SimpananPokok: Number(settingSimpanan?.SimpananPokok ?? 0),
-        SimpananWajib: Number(settingSimpanan?.SimpananWajib ?? 0),
-      SimpananSukarela: 0,
-          });
+    try {
+      const saved = await onSaveAndNew(values);
 
-      setErrors({});
+      if (saved) {
+        setForm({
+          ...defaultValues,
+          SimpananPokok: getSettingValue(settingSimpanan, "SimpananPokok"),
+          SimpananWajib: getSettingValue(settingSimpanan, "SimpananWajib"),
+          SimpananSukarela: 0,
+        });
+        setErrors({});
+
+        await showAlert(
+          "success",
+          `Anggota "${values.Nama}" berhasil disimpan.`,
+        );
+      }
+    } finally {
+      setSavingAndNew(false);
     }
   };
 
@@ -692,7 +701,7 @@ export function MemberForm({
             <Button
               type="button"
               onClick={handleSaveAndNew}
-              disabled={loadingDepartment || loadingSetting}
+              disabled={loadingDepartment || loadingSetting || savingAndNew}
               className="gap-2"
             >
               <Save className="size-4" />

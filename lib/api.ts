@@ -337,13 +337,7 @@ export type TransaksiSimpanan = {
 
 //post
 export type PostingTransakasiSimpananPayload = {
-IDTransaksi: string;
   Tanggal: string;
-    TotalAnggota: number;
-    TotalSimpananPokok: number;
-    TotalSimpananWajib: number;
-    TotalSimpananSukarela: number;
-    TotalSimpanan: number;
 }
 
 
