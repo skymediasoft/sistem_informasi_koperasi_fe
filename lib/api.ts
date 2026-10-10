@@ -340,8 +340,14 @@ export type PostingTransakasiSimpananPayload = {
   Tanggal: string;
 }
 
-
-
+export type InputSimpananTunaiPayload = {
+  TanggalSetor: string;
+  NoEmployee: string;
+  JenisSimpanan: string;
+  Nama: string;
+  JumlahSimpanan: number;
+  JumlahBulan: number;
+};
 
 export const TransaksiSimpananAPI = {
   findAll: () =>
@@ -350,4 +356,95 @@ export const TransaksiSimpananAPI = {
     handleResponse<string | { message?: string }>(
       api.post("/transaksi-simpanan/submit-posting", payload),
     ),
+};
+
+export const InputSimpananTunaiAPI = {
+  create: (payload: InputSimpananTunaiPayload) =>
+    handleResponse<unknown>(api.post("/inputsimpanantunai", payload)),
+  findAll: () =>
+    handleResponse<InputSimpananTunaiPayload[]>(api.get("/inputsimpanantunai")),
+};
+
+
+export type penarikanSimpananGet = {
+  Status: string;
+  DateFrom: Date;
+  DateTo: Date;
+  NoKaryawan: string;
+};
+
+export type SubmitTransaksiPenarikanDto = {
+  IDPengambilan: number;
+  IDTransaksiSimpanan: number;
+  Tanggal: Date;
+  NoAnggota: string;
+  JenisSimpanan: string;
+  Jumlah: number;
+};
+
+export type CloseTransaksiPenarikanDto = {
+  IDPengambilan: number;
+  TanggalTransfer: Date;
+  NoRef: string;
+};
+
+export const penarikanSimpananApi = {
+  getdataView: (payload: penarikanSimpananGet) =>
+    handleResponse<unknown>(api.get("/transaksi-penarikan", { params: payload })),
+
+  getById: (idPengambilan: string | number) =>
+    handleResponse<unknown>(
+      api.get(`/transaksi-penarikan/${encodeURIComponent(String(idPengambilan))}`),
+    ),
+
+  submit: (payload: SubmitTransaksiPenarikanDto) =>
+    handleResponse<unknown>(api.post("/transaksi-penarikan/submit", payload)),
+
+  close: (payload: CloseTransaksiPenarikanDto) =>
+    handleResponse<unknown>(api.post("/transaksi-penarikan/close", payload)),
+};
+
+
+
+
+
+export type penarikanSimpananResignGet = {
+  Status: string;
+  DateFrom: Date;
+  DateTo: Date;
+  NoKaryawan: string;
+};
+
+export type SubmitTransaksiPenarikanResignDto = {
+  IDPengambilan: number;
+  Tanggal: Date;
+  NoAnggota: string;
+  SimpananPokok: number;
+  SimpananWajib: number;
+  SimpananSukarela: number;
+
+};
+
+export type CloseTransaksiPenarikanResignDto = {
+  IDPengambilan: number;
+  TanggalTransfer: Date;
+  NoRef: string;
+};
+
+
+
+export const penarikanSimpananResignApi = {
+  getdataView: (payload: penarikanSimpananResignGet) =>
+    handleResponse<unknown>(api.get("/transaksi-penarikan/resign", { params: payload })),
+
+  getById: (idPengambilan: string | number) =>
+    handleResponse<unknown>(
+      api.get(`/transaksi-penarikan/resign/${encodeURIComponent(String(idPengambilan))}`),
+    ),
+
+  submit: (payload: SubmitTransaksiPenarikanResignDto) =>
+    handleResponse<unknown>(api.post("/transaksi-penarikan/resign/submit", payload)),
+
+  close: (payload: CloseTransaksiPenarikanResignDto) =>
+    handleResponse<unknown>(api.post("/transaksi-penarikan/resign/close", payload)),
 };
