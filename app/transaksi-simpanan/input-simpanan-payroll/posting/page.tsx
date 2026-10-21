@@ -17,7 +17,10 @@ import {
   secondaryMenu,
 } from "@/lib/auth/navigation";
 
-import { TransaksiSimpananAPI, type TransaksiSimpanan } from "@/lib/api";
+import {
+  TransaksiPayrollAPI,
+  type TransaksiSimpanan,
+} from "@/lib/api";
 
 import { showAlert, showConfirm } from "@/lib/alert";
 
@@ -30,6 +33,10 @@ export default function PostingSimpananPage() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [postedResult, setPostedResult] = useState<{
+    date: string;
+    message: string;
+  } | null>(null);
 
   useEffect(() => {
     const savedSession = getSessionFromStorage();
@@ -47,9 +54,13 @@ export default function PostingSimpananPage() {
       setLoading(true);
       setError(null);
 
-      const transaksi = await TransaksiSimpananAPI.findAll();
+      const transaksi = await TransaksiPayrollAPI.findAll();
 
-      setTransaksiData(transaksi ?? []);
+      if (!Array.isArray(transaksi)) {
+        throw new Error("Format data transaksi payroll dari server tidak valid.");
+      }
+
+      setTransaksiData(transaksi);
     } catch (err) {
       console.error("Gagal mengambil data transaksi simpanan:", err);
       setError("Gagal mengambil data transaksi simpanan.");
@@ -165,20 +176,20 @@ export default function PostingSimpananPage() {
        * TotalSimpananSukarela, dan TotalSimpanan
        * dihitung/dibuat oleh Stored Procedure.
        */
-      const result = await TransaksiSimpananAPI.postingSimpanan({
+      const result = await TransaksiPayrollAPI.submitPosting({
         Tanggal: postingDate,
       });
 
-      const message =
-        typeof result === "string"
-          ? result
-          : result?.message;
+      const message = getResponseMessage(result);
 
       if (message?.startsWith("Error ")) {
         throw new Error(message);
       }
 
-      await showAlert("success", message || "Posting simpanan berhasil.");
+      const successMessage =
+        message || "Posting simpanan berhasil.";
+      setPostedResult({ date: postingDate, message: successMessage });
+      await showAlert("success", successMessage);
 
       /**
        * Setelah posting berhasil:
@@ -199,14 +210,18 @@ export default function PostingSimpananPage() {
 
   return (
     <DashboardShell
-      title="Simpanan Anggota"
-      subtitle="Data simpanan setiap anggota koperasi"
+      title="Posting Simpanan Payroll"
+      subtitle="Pilih tanggal untuk memposting simpanan payroll"
       displayName={displayName}
       groupName={user?.groupName || "Koperasi"}
       initials={initials}
       menu={menu}
       secondaryMenu={secondaryMenu}
       onLogout={logout}
+      actionLabel="Kembali ke History"
+      onAction={() =>
+        router.push("/transaksi-simpanan/input-simpanan-payroll")
+      }
     >
       {" "}
       <div className="mb-6">
@@ -280,6 +295,23 @@ export default function PostingSimpananPage() {
           </Button>
         </div>
       </div>
+      {postedResult && (
+        <div
+          role="status"
+          className="mb-5 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800"
+        >
+          <p className="font-semibold">Posting berhasil</p>
+          <p className="mt-1">
+            Tanggal posting: {formatPostingDate(postedResult.date)}
+          </p>
+          <p className="mt-1">{postedResult.message}</p>
+          <p className="mt-2 text-emerald-700">
+            Tabel di bawah dimuat ulang dari endpoint payroll setelah
+            posting. Riwayat dan detail posting dapat dibuka dari halaman
+            history.
+          </p>
+        </div>
+      )}
       <div className="mt-6">
         {error && (
           <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
@@ -298,8 +330,16 @@ export default function PostingSimpananPage() {
         )}
 
         <DataTable
-          title="Transaksi simpanan anggota"
-          subtitle=""
+          title={
+            postedResult
+              ? "Data transaksi terbaru"
+              : "Pratinjau transaksi simpanan anggota"
+          }
+          subtitle={
+            postedResult
+              ? `Data terbaru untuk posting ${formatPostingDate(postedResult.date)}`
+              : "Data simpanan yang akan diproses oleh posting payroll."
+          }
           data={transaksiData}
           columns={columns}
           searchPlaceholder="Cari transaksi.."
@@ -324,6 +364,30 @@ function getLocalDateValue() {
   const offset = now.getTimezoneOffset() * 60_000;
 
   return new Date(now.getTime() - offset).toISOString().slice(0, 10);
+}
+
+function formatPostingDate(value: string) {
+  const [year, month, day] = value.split("-");
+
+  return year && month && day ? `${day}/${month}/${year}` : value;
+}
+
+function getResponseMessage(response: unknown): string | undefined {
+  if (typeof response === "string") return response;
+  if (typeof response !== "object" || response === null) return undefined;
+
+  const body = response as {
+    message?: unknown;
+    p_Message?: unknown;
+    error?: unknown;
+  };
+  const message = body.p_Message ?? body.message ?? body.error;
+
+  if (Array.isArray(message)) {
+    return message.map(String).join(" ");
+  }
+
+  return typeof message === "string" ? message : undefined;
 }
 
 function getPostingErrorMessage(error: unknown) {

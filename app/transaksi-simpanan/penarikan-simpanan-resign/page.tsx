@@ -169,13 +169,17 @@ export default function PenarikanSimpananResignPage() {
             >
               <label className="space-y-1.5 text-sm font-medium">
                 Status
-                <input
-                  type="text"
+                <select
                   value={status}
                   onChange={(event) => setStatus(event.target.value)}
-                  placeholder="Masukkan status"
                   className="h-9 w-full rounded-lg border border-input bg-background px-3 text-sm font-normal shadow-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
-                />
+                >
+                  <option value="" disabled>
+                  Semua Status
+                </option>
+                  <option value="Open">Open</option>
+                  <option value="Close">Close</option>
+                </select>
               </label>
 
               <label className="space-y-1.5 text-sm font-medium">

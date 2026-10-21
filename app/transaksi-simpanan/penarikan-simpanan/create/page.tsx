@@ -7,9 +7,10 @@ import { DashboardShell } from "@/components/dashboard/app-shell";
 import {
   PenarikanSimpananForm,
   type PenarikanSimpananFormValues,
+  type EmployeeSavings,
 } from "@/components/forms/penarikan-simpanan-form";
 import { showAlert } from "@/lib/alert";
-import { penarikanSimpananApi } from "@/lib/api";
+import { anggotaApi, penarikanSimpananApi } from "@/lib/api";
 import { useAuth } from "@/lib/auth/auth-context";
 import { getMenuByRole } from "@/lib/auth/navigation";
 
@@ -20,8 +21,6 @@ const today = () => {
 };
 
 const initialValues: PenarikanSimpananFormValues = {
-  IDPengambilan: "",
-  IDTransaksiSimpanan: "",
   Tanggal: today(),
   NoAnggota: "",
   JenisSimpanan: "",
@@ -54,6 +53,46 @@ export default function CreatePenarikanSimpananPage() {
     }
   };
 
+  const handleFindEmployee = async (
+    noEmployee: string,
+  ): Promise<EmployeeSavings | null> => {
+    const anggota = await anggotaApi.findAll();
+    const employee = anggota.find(
+      (member) =>
+        member.NoEmployee.trim().toLowerCase() === noEmployee.toLowerCase(),
+    );
+    if (!employee) return null;
+
+    return {
+      Nama: employee.Nama,
+      Total:
+        Number(employee.SimpananPokok || 0) +
+        Number(employee.SimpananWajib || 0) +
+        Number(employee.SimpananSukarela || 0),
+    };
+  };
+
+  const handleSaveAndNew = async (
+    payload: Parameters<typeof penarikanSimpananApi.submit>[0],
+  ): Promise<boolean> => {
+    setSubmitting(true);
+    try {
+      await penarikanSimpananApi.submit(payload);
+      await showAlert("success", "Transaksi penarikan berhasil disimpan.");
+      return true;
+    } catch (error) {
+      await showAlert(
+        "danger",
+        error instanceof Error
+          ? error.message
+          : "Gagal menyimpan transaksi penarikan.",
+      );
+      return false;
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   if (!user) return null;
 
   return (
@@ -72,6 +111,8 @@ export default function CreatePenarikanSimpananPage() {
           initialValues={initialValues}
           submitting={submitting}
           onSubmit={handleSubmit}
+          onSaveAndNew={handleSaveAndNew}
+          onFindEmployee={handleFindEmployee}
           onCancel={() => router.push("/transaksi-simpanan/penarikan-simpanan")}
         />
       </div>

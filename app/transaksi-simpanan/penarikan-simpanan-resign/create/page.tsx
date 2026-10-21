@@ -7,9 +7,10 @@ import { DashboardShell } from "@/components/dashboard/app-shell";
 import {
   PenarikanSimpananResignForm,
   type PenarikanSimpananResignFormValues,
+  type EmployeeSavings,
 } from "@/components/forms/penarikan-simpanan-resign-form";
 import { showAlert } from "@/lib/alert";
-import { penarikanSimpananResignApi } from "@/lib/api";
+import { anggotaApi, penarikanSimpananResignApi } from "@/lib/api";
 import { useAuth } from "@/lib/auth/auth-context";
 import { getMenuByRole } from "@/lib/auth/navigation";
 
@@ -20,7 +21,6 @@ const today = () => {
 };
 
 const initialValues: PenarikanSimpananResignFormValues = {
-  IDPengambilan: "",
   Tanggal: today(),
   NoAnggota: "",
   SimpananPokok: "",
@@ -54,6 +54,48 @@ export default function CreatePenarikanSimpananPage() {
     }
   };
 
+  const handleFindEmployee = async (
+    noEmployee: string,
+  ): Promise<EmployeeSavings | null> => {
+    const members = await anggotaApi.findAll();
+    const employee = members.find(
+      (member) =>
+        member.NoEmployee.trim().toLowerCase() === noEmployee.toLowerCase(),
+    );
+    if (!employee) return null;
+
+    return {
+      Nama: employee.Nama,
+      SimpananPokok: Number(employee.SimpananPokok || 0),
+      SimpananWajib: Number(employee.SimpananWajib || 0),
+      SimpananSukarela: Number(employee.SimpananSukarela || 0),
+    };
+  };
+
+  const handleSaveAndNew = async (
+    payload: Parameters<typeof penarikanSimpananResignApi.submit>[0],
+  ): Promise<boolean> => {
+    setSubmitting(true);
+    try {
+      await penarikanSimpananResignApi.submit(payload);
+      await showAlert(
+        "success",
+        "Transaksi penarikan simpanan resign berhasil disimpan.",
+      );
+      return true;
+    } catch (error) {
+      await showAlert(
+        "danger",
+        error instanceof Error
+          ? error.message
+          : "Gagal menyimpan transaksi penarikan simpanan resign.",
+      );
+      return false;
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   if (!user) return null;
 
   return (
@@ -72,6 +114,8 @@ export default function CreatePenarikanSimpananPage() {
           initialValues={initialValues}
           submitting={submitting}
           onSubmit={handleSubmit}
+          onSaveAndNew={handleSaveAndNew}
+          onFindEmployee={handleFindEmployee}
           onCancel={() => router.push("/transaksi-simpanan/penarikan-simpanan-resign")}
         />
       </div>

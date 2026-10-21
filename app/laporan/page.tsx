@@ -92,7 +92,7 @@ export default function ReportsPage() {
                     </tr>
                   ))}
                   <tr className="font-semibold">
-                    <td className="pt-4">Total simpanan</td>
+                    <td className="pt-4">Total simpanan</td> 
                     <td className="pt-4 text-right">Rp 4.572.220.000</td>
                   </tr>
                 </tbody>

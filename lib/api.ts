@@ -358,6 +358,27 @@ export const TransaksiSimpananAPI = {
     ),
 };
 
+export type SubmitTransaksiSimpananPostingDto = {
+  Tanggal: string;
+};
+
+export const TransaksiPayrollAPI = {
+  findAll: () =>
+    handleResponse<TransaksiSimpanan[]>(api.get("/payroll")),
+  history: (tahun: number) =>
+    handleResponse<unknown>(
+      api.get(`/payroll/history/${encodeURIComponent(String(tahun))}`),
+    ),
+  viewDetail: (idTransaksi: string | number) =>
+    handleResponse<unknown>(
+      api.get(
+        `/payroll/view-detail/${encodeURIComponent(String(idTransaksi))}`,
+      ),
+    ),
+  submitPosting: (payload: SubmitTransaksiSimpananPostingDto) =>
+    handleResponse<unknown>(api.post("/payroll/submit-posting", payload)),
+};
+
 export const InputSimpananTunaiAPI = {
   create: (payload: InputSimpananTunaiPayload) =>
     handleResponse<unknown>(api.post("/inputsimpanantunai", payload)),
@@ -374,8 +395,6 @@ export type penarikanSimpananGet = {
 };
 
 export type SubmitTransaksiPenarikanDto = {
-  IDPengambilan: number;
-  IDTransaksiSimpanan: number;
   Tanggal: Date;
   NoAnggota: string;
   JenisSimpanan: string;
@@ -416,7 +435,6 @@ export type penarikanSimpananResignGet = {
 };
 
 export type SubmitTransaksiPenarikanResignDto = {
-  IDPengambilan: number;
   Tanggal: Date;
   NoAnggota: string;
   SimpananPokok: number;
@@ -448,3 +466,18 @@ export const penarikanSimpananResignApi = {
   close: (payload: CloseTransaksiPenarikanResignDto) =>
     handleResponse<unknown>(api.post("/transaksi-penarikan/resign/close", payload)),
 };
+
+
+
+export const penarikanPayrollApi = {
+  getdataView: (payload: penarikanSimpananResignGet) =>
+    handleResponse<unknown>(api.get("/transaksi-penarikan/payroll", { params: payload })),
+  getDataByTahun: (tahun: number) =>
+    handleResponse<unknown>(api.get(`/transaksi-penarikan/payroll/${tahun}`)),
+  getViewDetail: (idPengambilan: string | number) =>
+    handleResponse<unknown>(
+      api.get(`/transaksi-penarikan/view-detail/${encodeURIComponent(String(idPengambilan))}`),
+    ),
+    posting: ( Tanggal: Date) =>
+    handleResponse<unknown>(api.post("/transaksi-penarikan/payroll/posting", Tanggal)),
+}
