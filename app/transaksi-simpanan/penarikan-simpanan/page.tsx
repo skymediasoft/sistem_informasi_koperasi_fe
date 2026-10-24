@@ -29,7 +29,7 @@ const formatCellValue = (value: unknown) => {
 
 export default function PenarikanSimpananPage() {
   const { logout, user } = useAuth();
-  const [status, setStatus] = useState("");
+  const [status, setStatus] = useState("Open");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
   const [noKaryawan, setNoKaryawan] = useState("");
@@ -170,6 +170,7 @@ export default function PenarikanSimpananPage() {
               <label className="space-y-1.5 text-sm font-medium">
                 Status
                 <select
+                  required
                   value={status}
                   onChange={(event) => setStatus(event.target.value)}
                   className="h-9 w-full rounded-lg border border-input bg-background px-3 text-sm font-normal shadow-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
@@ -214,6 +215,7 @@ export default function PenarikanSimpananPage() {
                 No. Karyawan
                 <input
                   type="text"
+                  required
                   value={noKaryawan}
                   onChange={(event) => setNoKaryawan(event.target.value)}
                   placeholder="Masukkan nomor karyawan"

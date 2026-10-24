@@ -17,14 +17,12 @@ import {
 } from "@/lib/auth/navigation";
 import {
   InputSimpananTunaiAPI,
+  type InputSimpananTunaiPayload,
   TransaksiSimpananAPI,
-  type TransaksiSimpanan,
 } from "@/lib/api";
 import { showAlert, showConfirm } from "@/lib/alert";
 
-type InputSimpananTunai = TransaksiSimpanan & {
-  Tanggal?: string;
-};
+type InputSimpananTunai = InputSimpananTunaiPayload;
 
 export default function ListSimpananTunaiPage() {
   const router = useRouter();
@@ -72,19 +70,18 @@ export default function ListSimpananTunaiPage() {
 
   return inputSimpananTunaiData.filter((item) => {
     const itemDate = String(item.Tanggal ?? "").slice(0, 10);
-    const itemNama = String(item.Nama ?? "").toLowerCase();
+    const itemNoAnggota = String(item.NoAnggota ?? "").toLowerCase();
 
     // Filter jenis simpanan
     if (jenisSimpanan) {
-      const jenisValue = Number(
-        jenisSimpanan === "pokok"
-          ? item.SimpananPokok
-          : jenisSimpanan === "wajib"
-            ? item.SimpananWajib
-            : item.SimpananSukarela,
-      );
-
-      if (!jenisValue) return false;
+      const selectedType = jenisSimpanan === "pokok"
+        ? "pokok"
+        : jenisSimpanan === "wajib"
+          ? "wajib"
+          : "sukarela";
+      if (!String(item.JenisSimpanan).toLowerCase().includes(selectedType)) {
+        return false;
+      }
     }
 
     // Filter tanggal dari
@@ -98,7 +95,11 @@ export default function ListSimpananTunaiPage() {
     }
 
     // Filter nama
-    if (nama && !itemNama.includes(nama.toLowerCase())) {
+    if (
+      nama &&
+      !itemNoAnggota.includes(nama.toLowerCase()) &&
+      !String(item.JenisSimpanan).toLowerCase().includes(nama.toLowerCase())
+    ) {
       return false;
     }
 
@@ -127,41 +128,45 @@ export default function ListSimpananTunaiPage() {
 
   const columns = useMemo(
     () => [
-      { key: "Tanggal", header: "Tanggal" },
       {
-        key: "NoEmployee",
-        header: "No Employee",
-        accessor: (row: TransaksiSimpanan) => row.NoEmployee,
+        key: "Tanggal",
+        header: "Tanggal",
+        accessor: (row: InputSimpananTunai) => formatDate(row.Tanggal),
       },
       {
-        key: "Nama",
-        header: "Nama",
-        accessor: (row: TransaksiSimpanan) => row.Nama,
+        key: "IDTransaksi",
+        header: "ID Transaksi",
       },
       {
-        key: "SimpananPokok",
-        header: "Simpanan Pokok",
-        accessor: (row: TransaksiSimpanan) => formatRupiah(row.SimpananPokok),
+        key: "NoAnggota",
+        header: "No. Anggota",
       },
       {
-        key: "SimpananWajib",
-        header: "Simpanan Wajib",
-        accessor: (row: TransaksiSimpanan) => formatRupiah(row.SimpananWajib),
+        key: "JenisSimpanan",
+        header: "Jenis Simpanan",
       },
       {
-        key: "SimpananSukarela",
-        header: "Simpanan Sukarela",
-        accessor: (row: TransaksiSimpanan) =>
-          formatRupiah(row.SimpananSukarela),
+        key: "Jumlah",
+        header: "Jumlah",
+        accessor: (row: InputSimpananTunai) => formatRupiah(row.Jumlah),
       },
       {
-        key: "Total",
-        header: "Total",
-        accessor: (row: TransaksiSimpanan) => formatRupiah(row.Total),
+        key: "JumlahBulan",
+        header: "Jumlah Bulan",
       },
     ],
     [],
   );
+
+  const handleEdit = (row: InputSimpananTunai) => {
+    if (!row.IDTransaksi || row.IDTransaksi === "0") {
+      void showAlert("danger", "ID transaksi tidak tersedia untuk diedit.");
+      return;
+    }
+    router.push(
+      `/transaksi-simpanan/input-simpanan-tunai/edit/${encodeURIComponent(row.IDTransaksi)}`,
+    );
+  };
 
   const handlePosting = async () => {
     const confirmation = await showConfirm(
@@ -298,10 +303,10 @@ return (
               </div>
             </div>
 
-            {/* NAMA */}
+            {/* SEARCH */}
             <div className="space-y-1.5">
               <label className="text-sm font-medium">
-                Nama
+                No. Anggota / Jenis Simpanan
               </label>
 
               <div className="relative">
@@ -309,7 +314,7 @@ return (
 
                 <input
                   type="text"
-                  placeholder="Cari nama..."
+                  placeholder="Cari nomor anggota atau jenis simpanan..."
                   value={nama}
                   onChange={(e) => setNama(e.target.value)}
                   onKeyDown={(e) => {
@@ -380,6 +385,8 @@ return (
                 "/transaksi-simpanan/input-simpanan-tunai/create"
               )
             }
+            createLabel="Input Simpanan Tunai"
+            onEdit={handleEdit}
             emptyMessage={
               loading
                 ? "Memuat data transaksi..."
@@ -398,6 +405,11 @@ return (
 function formatRupiah(value: number | string | null | undefined) {
   const amount = Number(value || 0);
   return `Rp ${Number.isFinite(amount) ? amount.toLocaleString("id-ID") : "0"}`;
+}
+
+function formatDate(value: Date | string) {
+  const date = new Date(value);
+  return Number.isFinite(date.getTime()) ? date.toLocaleDateString("id-ID") : "-";
 }
 
 function getLocalDateValue() {

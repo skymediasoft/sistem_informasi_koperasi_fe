@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 import { DashboardShell } from "@/components/dashboard/app-shell";
 import { InputSimpananTunaiForm } from "@/components/forms/input-simpanan-tunai-form";
@@ -15,6 +16,7 @@ import { getMenuByRole, secondaryMenu } from "@/lib/auth/navigation";
 export default function CreateInputSimpananTunaiPage() {
   const router = useRouter();
   const { logout, user } = useAuth();
+  const [submitting, setSubmitting] = useState(false);
   const role = user?.role ?? "administrator";
   const menu = getMenuByRole(role);
   const displayName = user?.name || "Administrator Koperasi";
@@ -28,11 +30,12 @@ export default function CreateInputSimpananTunaiPage() {
     : "AD";
 
   const handleSubmit = async (values: InputSimpananTunaiPayload) => {
+    setSubmitting(true);
     try {
-      await InputSimpananTunaiAPI.create(values);
+      await InputSimpananTunaiAPI.submit(values);
       await showAlert(
         "success",
-        `Simpanan tunai untuk "${values.Nama}" berhasil disimpan.`,
+        "Simpanan tunai berhasil disimpan.",
       );
       router.push("/transaksi-simpanan/input-simpanan-tunai");
     } catch (error) {
@@ -42,14 +45,17 @@ export default function CreateInputSimpananTunaiPage() {
           ? error.message
           : "Gagal menyimpan simpanan tunai.",
       );
+    } finally {
+      setSubmitting(false);
     }
   };
 
   const handleSaveAndNew = async (
     values: InputSimpananTunaiPayload,
   ): Promise<boolean> => {
+    setSubmitting(true);
     try {
-      await InputSimpananTunaiAPI.create(values);
+      await InputSimpananTunaiAPI.submit(values);
       return true;
     } catch (error) {
       await showAlert(
@@ -59,6 +65,8 @@ export default function CreateInputSimpananTunaiPage() {
           : "Gagal menyimpan simpanan tunai.",
       );
       return false;
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -77,6 +85,7 @@ export default function CreateInputSimpananTunaiPage() {
     >
       <div className="mx-auto max-w-4xl">
         <InputSimpananTunaiForm
+          submitting={submitting}
           onSubmit={handleSubmit}
           onSaveAndNew={handleSaveAndNew}
           onCancel={() =>

@@ -10,7 +10,7 @@ export type PenarikanSimpananFormValues = {
   IDPengambilan?: string;
   IDTransaksiSimpanan?: string;
   Tanggal: string;
-  NoAnggota: string;
+  NoEmployee: string;
   JenisSimpanan: string;
   Jumlah: string;
 };
@@ -45,6 +45,16 @@ const formatRupiah = (amount: number) =>
     maximumFractionDigits: 0,
   }).format(amount);
 
+const formatRupiahInput = (value: string) => {
+  const numericValue = value.replace(/\D/g, "");
+
+  return numericValue
+    ? new Intl.NumberFormat("id-ID", { maximumFractionDigits: 0 }).format(
+        Number(numericValue),
+      )
+    : "";
+};
+
 export function PenarikanSimpananForm({
   initialValues,
   submitting,
@@ -64,7 +74,7 @@ export function PenarikanSimpananForm({
     setValues((current) => ({ ...current, [name]: value }));
 
   const lookupEmployee = async () => {
-    const noEmployee = values.NoAnggota.trim();
+    const noEmployee = values.NoEmployee.trim();
     if (!onFindEmployee || !noEmployee || lookingUpEmployee) return;
 
     setLookingUpEmployee(true);
@@ -97,7 +107,7 @@ export function PenarikanSimpananForm({
       !values.Tanggal ||
       !Number.isFinite(tanggal.getTime()) ||
       values.Tanggal > today ||
-      !values.NoAnggota.trim() ||
+      !values.NoEmployee.trim() ||
       !values.JenisSimpanan.trim() ||
       !Number.isFinite(jumlah) ||
       jumlah < 0
@@ -114,8 +124,10 @@ export function PenarikanSimpananForm({
     }
 
     return {
+      IDPengambilan: Number(values.IDPengambilan || 0),
+      IDTransaksiSimpanan: Number(values.IDTransaksiSimpanan || 0),
       Tanggal: tanggal,
-      NoAnggota: values.NoAnggota.trim(),
+      NoEmployee: values.NoEmployee.trim(),
       JenisSimpanan: values.JenisSimpanan.trim(),
       Jumlah: jumlah,
     };
@@ -138,7 +150,7 @@ export function PenarikanSimpananForm({
       if (saved) {
         setValues({
           Tanggal: getLocalDate(),
-          NoAnggota: "",
+          NoEmployee: "",
           JenisSimpanan: "",
           Jumlah: "",
         });
@@ -161,6 +173,16 @@ export function PenarikanSimpananForm({
           onSubmit={handleSubmit}
           className="grid grid-cols-1 gap-4 md:grid-cols-2"
         >
+          <input
+            type="hidden"
+            name="IDPengambilan"
+            value={values.IDPengambilan || "0"}
+          />
+          <input
+            type="hidden"
+            name="IDTransaksiSimpanan"
+            value={values.IDTransaksiSimpanan || "0"}
+          />
           <FormField label="Tanggal Penarikan">
             <input
               required
@@ -171,13 +193,29 @@ export function PenarikanSimpananForm({
               className={inputClassName}
             />
           </FormField>
+                    <FormField label="Jenis Simpanan">
+             <select
+             required
+                  value={values.JenisSimpanan}
+                  onChange={(event) =>
+                updateValue("JenisSimpanan", event.target.value)
+              }
+                  className="h-9 w-full rounded-lg border border-input bg-background px-3 text-sm font-normal shadow-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
+                >
+                  <option value="" disabled>
+                   Jenis Simpanan
+                </option>
+                  <option value="SIMPANAN WAJIB">SIMPANAN WAJIB</option>
+                  <option value="SIMPANAN SUKARELA">SIMPANAN SUKARELA</option>
+                </select>
+          </FormField>
           <FormField label="No. Employee">
             <input
               required
               type="text"
-              value={values.NoAnggota}
+              value={values.NoEmployee}
               onChange={(event) => {
-                updateValue("NoAnggota", event.target.value);
+                updateValue("NoEmployee", event.target.value);
                 setEmployee(null);
                 setLookupError("");
               }}
@@ -206,30 +244,24 @@ export function PenarikanSimpananForm({
               className={`${inputClassName} bg-muted`}
             />
           </FormField>
-          <FormField label="Jenis Simpanan">
-            <input
-              required
-              type="text"
-              value={values.JenisSimpanan}
-              onChange={(event) =>
-                updateValue("JenisSimpanan", event.target.value)
-              }
-              className={inputClassName}
-            />
-          </FormField>
+
           <FormField label="Jumlah Penarikan">
-            <input
-              required
-              type="number"
-              min="0"
-              step="any"
-              value={values.Jumlah}
-              onChange={(event) => {
-                updateValue("Jumlah", event.target.value);
-                setLookupError("");
-              }}
-              className={inputClassName}
-            />
+            <div className="relative">
+              <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                Rp
+              </span>
+              <input
+                required
+                type="text"
+                inputMode="numeric"
+                value={formatRupiahInput(values.Jumlah)}
+                onChange={(event) => {
+                  updateValue("Jumlah", event.target.value.replace(/\D/g, ""));
+                  setLookupError("");
+                }}
+                className={`${inputClassName} pl-10`}
+              />
+            </div>
           </FormField>
           {onFindEmployee ? (
             <div

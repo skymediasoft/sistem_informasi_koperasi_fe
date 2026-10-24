@@ -21,6 +21,7 @@ const today = () => {
 };
 
 const initialValues: PenarikanSimpananResignFormValues = {
+  IDPengambilan: "0",
   Tanggal: today(),
   NoAnggota: "",
   SimpananPokok: "",

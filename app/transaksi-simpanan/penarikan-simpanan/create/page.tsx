@@ -22,7 +22,7 @@ const today = () => {
 
 const initialValues: PenarikanSimpananFormValues = {
   Tanggal: today(),
-  NoAnggota: "",
+  NoEmployee: "",
   JenisSimpanan: "",
   Jumlah: "",
 };

@@ -341,11 +341,11 @@ export type PostingTransakasiSimpananPayload = {
 }
 
 export type InputSimpananTunaiPayload = {
-  TanggalSetor: string;
-  NoEmployee: string;
+  IDTransaksi: string;
+  Tanggal: Date;
+  NoAnggota: string;
   JenisSimpanan: string;
-  Nama: string;
-  JumlahSimpanan: number;
+  Jumlah: number;
   JumlahBulan: number;
 };
 
@@ -380,8 +380,12 @@ export const TransaksiPayrollAPI = {
 };
 
 export const InputSimpananTunaiAPI = {
-  create: (payload: InputSimpananTunaiPayload) =>
-    handleResponse<unknown>(api.post("/inputsimpanantunai", payload)),
+  submit: (payload: InputSimpananTunaiPayload) =>
+    handleResponse<unknown>(api.post("/tunai/submit", payload)),
+  getById: (idTransaksi: string | number) =>
+    handleResponse<unknown>(
+      api.get(`/tunai/${encodeURIComponent(String(idTransaksi))}`),
+    ),
   findAll: () =>
     handleResponse<InputSimpananTunaiPayload[]>(api.get("/inputsimpanantunai")),
 };
@@ -393,10 +397,12 @@ export type penarikanSimpananGet = {
   DateTo: Date;
   NoKaryawan: string;
 };
-
+  
 export type SubmitTransaksiPenarikanDto = {
+  IDPengambilan: number;
+  IDTransaksiSimpanan: number;
   Tanggal: Date;
-  NoAnggota: string;
+  NoEmployee: string;
   JenisSimpanan: string;
   Jumlah: number;
 };
@@ -435,12 +441,12 @@ export type penarikanSimpananResignGet = {
 };
 
 export type SubmitTransaksiPenarikanResignDto = {
+  IDPengambilan: number;
   Tanggal: Date;
   NoAnggota: string;
   SimpananPokok: number;
   SimpananWajib: number;
   SimpananSukarela: number;
-
 };
 
 export type CloseTransaksiPenarikanResignDto = {

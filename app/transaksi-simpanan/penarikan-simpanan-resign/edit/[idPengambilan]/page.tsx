@@ -80,10 +80,7 @@ export default function EditPenarikanSimpananPage() {
   ) => {
     setSubmitting(true);
     try {
-      await penarikanSimpananResignApi.submit({
-        ...payload,
-        IDPengambilan: Number(idPengambilan),
-      });
+      await penarikanSimpananResignApi.submit(payload);
       await showAlert("success", "Transaksi penarikan simpanan resign berhasil diperbarui.");
       router.push(listPath);
     } catch (requestError) {

@@ -33,7 +33,7 @@ const toFormValues = (
   IDPengambilan: String(record.IDPengambilan ?? routeId),
   IDTransaksiSimpanan: String(record.IDTransaksiSimpanan ?? ""),
   Tanggal: asInputDate(record.Tanggal),
-  NoAnggota: String(record.NoAnggota ?? ""),
+  NoEmployee: String(record.NoEmployee ?? ""),
   JenisSimpanan: String(record.JenisSimpanan ?? ""),
   Jumlah: String(record.Jumlah ?? ""),
 });
@@ -80,10 +80,7 @@ export default function EditPenarikanSimpananPage() {
   ) => {
     setSubmitting(true);
     try {
-      await penarikanSimpananApi.submit({
-        ...payload,
-        IDPengambilan: Number(idPengambilan),
-      });
+      await penarikanSimpananApi.submit(payload);
       await showAlert("success", "Transaksi penarikan berhasil diperbarui.");
       router.push(listPath);
     } catch (requestError) {

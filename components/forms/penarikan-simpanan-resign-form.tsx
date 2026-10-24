@@ -12,6 +12,7 @@ import {
 import type { SubmitTransaksiPenarikanResignDto } from "@/lib/api";
 
 export type PenarikanSimpananResignFormValues = {
+  IDPengambilan?: string;
   Tanggal: string;
   NoAnggota: string;
   SimpananPokok: string;
@@ -141,6 +142,7 @@ export function PenarikanSimpananResignForm({
     }
 
     return {
+      IDPengambilan: Number(values.IDPengambilan || 0),
       Tanggal: tanggal,
       NoAnggota: values.NoAnggota.trim(),
       SimpananPokok: simpanan[0],
@@ -167,6 +169,7 @@ export function PenarikanSimpananResignForm({
       const saved = await onSaveAndNew(payload);
       if (saved) {
         setValues({
+          IDPengambilan: "0",
           Tanggal: getLocalDate(),
           NoAnggota: "",
           SimpananPokok: "",
@@ -200,6 +203,11 @@ export function PenarikanSimpananResignForm({
           onSubmit={handleSubmit}
           className="grid grid-cols-1 gap-4 md:grid-cols-2"
         >
+          <input
+            type="hidden"
+            name="IDPengambilan"
+            value={values.IDPengambilan || "0"}
+          />
           <FormField label="Tanggal Penarikan">
             <input
               required
