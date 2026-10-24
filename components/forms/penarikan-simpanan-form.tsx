@@ -115,7 +115,9 @@ export function PenarikanSimpananForm({
       return null;
     }
     if (onFindEmployee && !employee) {
-      setLookupError("Masukkan No. Employee lalu tekan Enter untuk memuat data.");
+      setLookupError(
+        "Masukkan No. Employee lalu klik Cek Data atau tekan Enter.",
+      );
       return null;
     }
     if (employee && jumlah > employee.Total) {
@@ -209,25 +211,39 @@ export function PenarikanSimpananForm({
                   <option value="SIMPANAN SUKARELA">SIMPANAN SUKARELA</option>
                 </select>
           </FormField>
-          <FormField label="No. Employee">
-            <input
-              required
-              type="text"
-              value={values.NoEmployee}
-              onChange={(event) => {
-                updateValue("NoEmployee", event.target.value);
-                setEmployee(null);
-                setLookupError("");
-              }}
-              onKeyDown={(event) => {
-                if (event.key === "Enter" && onFindEmployee) {
-                  event.preventDefault();
-                  void lookupEmployee();
-                }
-              }}
-              className={inputClassName}
-            />
-          </FormField>
+          <div className="grid gap-1.5 text-sm font-medium">
+            <label htmlFor="no-employee">No. Employee</label>
+            <div className="flex gap-2">
+              <input
+                id="no-employee"
+                required
+                type="text"
+                value={values.NoEmployee}
+                onChange={(event) => {
+                  updateValue("NoEmployee", event.target.value);
+                  setEmployee(null);
+                  setLookupError("");
+                }}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" && onFindEmployee) {
+                    event.preventDefault();
+                    void lookupEmployee();
+                  }
+                }}
+                className={`${inputClassName} min-w-0 flex-1`}
+              />
+              {onFindEmployee ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => void lookupEmployee()}
+                  disabled={!values.NoEmployee.trim() || lookingUpEmployee}
+                >
+                  {lookingUpEmployee ? "Memuat..." : "Cek Data"}
+                </Button>
+              ) : null}
+            </div>
+          </div>
           <FormField label="Nama">
             <input
               type="text"
@@ -275,7 +291,7 @@ export function PenarikanSimpananForm({
                   ? "Memuat data karyawan..."
                   : employee
                     ? "Data karyawan berhasil dimuat."
-                    : "Tekan Enter pada No. Employee untuk memuat data.")}
+                    : "Klik Cek Data atau tekan Enter untuk memuat data.")}
             </div>
           ) : null}
           <div className="flex justify-end gap-3 md:col-span-2">

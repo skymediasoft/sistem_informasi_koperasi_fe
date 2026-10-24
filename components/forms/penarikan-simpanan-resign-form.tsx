@@ -128,7 +128,9 @@ export function PenarikanSimpananResignForm({
       (onFindEmployee && !employeeName)
     ) {
       if (onFindEmployee && !employeeName) {
-        setLookupError("Masukkan No. Employee lalu tekan Enter untuk memuat data.");
+        setLookupError(
+          "Masukkan No. Employee lalu klik Cek Data atau tekan Enter.",
+        );
       }
       return null;
     }
@@ -221,34 +223,48 @@ export function PenarikanSimpananResignForm({
             />
           </FormField>
 
-          <FormField label="No. Employee">
-            <input
-              required
-              type="text"
-              maxLength={10}
-              value={values.NoAnggota}
-              onChange={(event) => {
-                updateValue("NoAnggota", event.target.value);
-                setEmployeeName("");
-                setLookupError("");
-                if (onFindEmployee) {
-                  setValues((current) => ({
-                    ...current,
-                    SimpananPokok: "",
-                    SimpananWajib: "",
-                    SimpananSukarela: "",
-                  }));
-                }
-              }}
-              onKeyDown={(event) => {
-                if (event.key === "Enter" && onFindEmployee) {
-                  event.preventDefault();
-                  void lookupEmployee();
-                }
-              }}
-              className={inputClassName}
-            />
-          </FormField>
+          <div className="grid gap-1.5 text-sm font-medium">
+            <label htmlFor="no-employee">No. Employee</label>
+            <div className="flex gap-2">
+              <input
+                id="no-employee"
+                required
+                type="text"
+                maxLength={10}
+                value={values.NoAnggota}
+                onChange={(event) => {
+                  updateValue("NoAnggota", event.target.value);
+                  setEmployeeName("");
+                  setLookupError("");
+                  if (onFindEmployee) {
+                    setValues((current) => ({
+                      ...current,
+                      SimpananPokok: "",
+                      SimpananWajib: "",
+                      SimpananSukarela: "",
+                    }));
+                  }
+                }}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" && onFindEmployee) {
+                    event.preventDefault();
+                    void lookupEmployee();
+                  }
+                }}
+                className={`${inputClassName} min-w-0 flex-1`}
+              />
+              {onFindEmployee ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => void lookupEmployee()}
+                  disabled={!values.NoAnggota.trim() || lookingUpEmployee}
+                >
+                  {lookingUpEmployee ? "Memuat..." : "Cek Data"}
+                </Button>
+              ) : null}
+            </div>
+          </div>
 
           {onFindEmployee ? (
             <FormField label="Nama">
@@ -333,7 +349,7 @@ export function PenarikanSimpananResignForm({
                     ? "Memuat data karyawan..."
                     : employeeName
                       ? "Data karyawan berhasil dimuat."
-                      : "Tekan Enter pada No. Employee untuk memuat data.")}
+                      : "Klik Cek Data atau tekan Enter untuk memuat data.")}
               </div>
             </>
           ) : null}
