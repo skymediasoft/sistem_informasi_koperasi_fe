@@ -280,10 +280,14 @@ export function PenarikanSimpananResignForm({
           <FormField label="Simpanan Pokok">
             <input
               required
-              type="number"
+              type={onFindEmployee ? "text" : "number"}
               min="0"
               step="1"
-              value={values.SimpananPokok}
+                value={
+                onFindEmployee && values.SimpananPokok !== ""
+                  ? formatRupiah(Number(values.SimpananPokok))
+                  : values.SimpananPokok
+              }
               readOnly={Boolean(onFindEmployee)}
               onChange={(event) =>
                 updateValue("SimpananPokok", event.target.value)
@@ -297,10 +301,14 @@ export function PenarikanSimpananResignForm({
           <FormField label="Simpanan Wajib">
             <input
               required
-              type="number"
+              type={onFindEmployee ? "text" : "number"}
               min="0"
               step="1"
-              value={values.SimpananWajib}
+                value={
+                onFindEmployee && values.SimpananWajib !== ""
+                  ? formatRupiah(Number(values.SimpananWajib))
+                  : values.SimpananWajib
+              }
               readOnly={Boolean(onFindEmployee)}
               onChange={(event) =>
                 updateValue("SimpananWajib", event.target.value)
@@ -314,10 +322,14 @@ export function PenarikanSimpananResignForm({
           <FormField label="Simpanan Sukarela">
             <input
               required
-              type="number"
+              type={onFindEmployee ? "text" : "number"}
               min="0"
               step="1"
-              value={values.SimpananSukarela}
+              value={
+                onFindEmployee && values.SimpananSukarela !== ""
+                  ? formatRupiah(Number(values.SimpananSukarela))
+                  : values.SimpananSukarela
+              }
               readOnly={Boolean(onFindEmployee)}
               onChange={(event) =>
                 updateValue("SimpananSukarela", event.target.value)

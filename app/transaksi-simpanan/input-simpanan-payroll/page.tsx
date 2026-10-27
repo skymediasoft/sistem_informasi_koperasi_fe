@@ -22,6 +22,16 @@ const postingPath = "/transaksi-simpanan/input-simpanan-payroll/posting";
 const detailPath =
   "/transaksi-simpanan/input-simpanan-payroll/detail-posting";
 const idKeys = ["IDTransaksi", "IdTransaksi", "idTransaksi", "id"];
+const currencyFields = new Set([
+  "simpananpokok",
+  "simpananwajib",
+  "simpanansukarela",
+  "totalsimpananpokok",
+  "totalsimpananwajib",
+  "totalsimpanansukarela",
+  "totalsimpanan",
+  "total",
+]);
 
 function isRecord(value: unknown): value is PayrollRow {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -42,8 +52,18 @@ function getTransactionId(row: PayrollRow) {
   return idKey ? String(row[idKey]) : null;
 }
 
-function formatCellValue(value: unknown) {
+function formatCellValue(value: unknown, key: string) {
   if (value === null || value === undefined || value === "") return "-";
+  if (currencyFields.has(key.toLowerCase())) {
+    const amount = Number(value);
+    if (Number.isFinite(amount)) {
+      return new Intl.NumberFormat("id-ID", {
+        style: "currency",
+        currency: "IDR",
+        maximumFractionDigits: 0,
+      }).format(amount);
+    }
+  }
   if (typeof value === "object") return JSON.stringify(value);
   return String(value);
 }
@@ -113,7 +133,7 @@ export default function HistorySimpananPayrollPage() {
       Object.keys(history[0] ?? {}).map((key) => ({
         key,
         header: key,
-        accessor: (row: PayrollRow) => formatCellValue(row[key]),
+        accessor: (row: PayrollRow) => formatCellValue(row[key], key),
       })),
     [history],
   );

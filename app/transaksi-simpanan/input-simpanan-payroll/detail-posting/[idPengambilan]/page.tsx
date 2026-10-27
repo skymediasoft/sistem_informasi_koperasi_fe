@@ -18,6 +18,17 @@ import {
 
 type PayrollDetailRow = Record<string, unknown>;
 
+const currencyFields = new Set([
+  "simpananpokok",
+  "simpananwajib",
+  "simpanansukarela",
+  "totalsimpananpokok",
+  "totalsimpananwajib",
+  "totalsimpanansukarela",
+  "totalsimpanan",
+  "total",
+]);
+
 function isRecord(value: unknown): value is PayrollDetailRow {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
@@ -29,8 +40,18 @@ function getRows(value: unknown): PayrollDetailRow[] {
   throw new Error("Format detail payroll dari server tidak valid.");
 }
 
-function formatCellValue(value: unknown) {
+function formatCellValue(value: unknown, key: string) {
   if (value === null || value === undefined || value === "") return "-";
+  if (currencyFields.has(key.toLowerCase())) {
+    const amount = Number(value);
+    if (Number.isFinite(amount)) {
+      return new Intl.NumberFormat("id-ID", {
+        style: "currency",
+        currency: "IDR",
+        maximumFractionDigits: 0,
+      }).format(amount);
+    }
+  }
   if (typeof value === "object") return JSON.stringify(value);
   return String(value);
 }
@@ -78,7 +99,7 @@ export default function DetailPostingPayrollPage() {
       Object.keys(detail[0] ?? {}).map((key) => ({
         key,
         header: key,
-        accessor: (row: PayrollDetailRow) => formatCellValue(row[key]),
+        accessor: (row: PayrollDetailRow) => formatCellValue(row[key], key),
       })),
     [detail],
   );
