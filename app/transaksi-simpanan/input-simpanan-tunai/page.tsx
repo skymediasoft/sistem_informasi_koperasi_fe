@@ -18,6 +18,7 @@ import {
 import {
   InputSimpananTunaiAPI,
   type InputSimpananTunaiPayload,
+  type ViewTransaksiSimpananTunaiParams,
   TransaksiSimpananAPI,
 } from "@/lib/api";
 import { showAlert, showConfirm } from "@/lib/alert";
@@ -35,10 +36,9 @@ export default function ListSimpananTunaiPage() {
 
   //buat filtering
   const [jenisSimpanan, setJenisSimpanan] = useState("");
-  const [dateFrom, setDateFrom] = useState("");
-  const [dateTo, setDateTo] = useState("");
+  const [dateFrom, setDateFrom] = useState("1900-01-01");
+  const [dateTo, setDateTo] = useState(getLocalDateValue);
   const [nama, setNama] = useState("");
-  const [searchTriggered, setSearchTriggered] = useState(false);
 
   useEffect(() => {
     if (!getSessionFromStorage()) {
@@ -46,14 +46,21 @@ export default function ListSimpananTunaiPage() {
       return;
     }
 
-    void fetchDataSimpananTunai();
+    void fetchDataSimpananTunai({
+      JenisSimpanan: jenisSimpanan,
+      DateFrom: dateFrom,
+      DateTo: dateTo,
+      NoKaryawan: "",
+    });
   }, [router]);
 
-  const fetchDataSimpananTunai = async () => {
+  const fetchDataSimpananTunai = async (
+    params: ViewTransaksiSimpananTunaiParams,
+  ) => {
     try {
       setLoading(true);
       setError(null);
-      const inputSimpananTunai = await InputSimpananTunaiAPI.findAll();
+      const inputSimpananTunai = await InputSimpananTunaiAPI.findAll(params);
       setInputSimpananTunaiData(
         (inputSimpananTunai ?? []) as unknown as InputSimpananTunai[],
       );
@@ -65,54 +72,13 @@ export default function ListSimpananTunaiPage() {
     }
   };
 
-  const filteredTransaksiData = useMemo(() => {
-  if (!searchTriggered) return inputSimpananTunaiData;
-
-  return inputSimpananTunaiData.filter((item) => {
-    const itemDate = String(item.Tanggal ?? "").slice(0, 10);
-    const itemNoAnggota = String(item.NoAnggota ?? "").toLowerCase();
-
-    // Filter jenis simpanan
-    if (jenisSimpanan) {
-      const selectedType = jenisSimpanan === "pokok"
-        ? "pokok"
-        : jenisSimpanan === "wajib"
-          ? "wajib"
-          : "sukarela";
-      if (!String(item.JenisSimpanan).toLowerCase().includes(selectedType)) {
-        return false;
-      }
-    }
-
-    // Filter tanggal dari
-    if (dateFrom && itemDate < dateFrom) {
-      return false;
-    }
-
-    // Filter tanggal sampai
-    if (dateTo && itemDate > dateTo) {
-      return false;
-    }
-
-    // Filter nama
-    if (
-      nama &&
-      !itemNoAnggota.includes(nama.toLowerCase()) &&
-      !String(item.JenisSimpanan).toLowerCase().includes(nama.toLowerCase())
-    ) {
-      return false;
-    }
-
-    return true;
-  });
-}, [
-  inputSimpananTunaiData,
-  jenisSimpanan,
-  dateFrom,
-  dateTo,
-  nama,
-  searchTriggered,
-]);
+  const searchTransaksiSimpananTunai = () =>
+    fetchDataSimpananTunai({
+      JenisSimpanan: jenisSimpanan,
+      DateFrom: dateFrom,
+      DateTo: dateTo,
+      NoKaryawan: nama.trim(),
+    });
 
   const role = user?.role ?? "administrator";
   const menu = getMenuByRole(role);
@@ -186,7 +152,7 @@ export default function ListSimpananTunaiPage() {
       if (message?.startsWith("Error ")) throw new Error(message);
 
       await showAlert("success", message || "Posting simpanan berhasil.");
-      await fetchDataSimpananTunai();
+      await searchTransaksiSimpananTunai();
     } catch (err) {
       console.error("Gagal melakukan posting simpanan:", err);
       await showAlert("danger", getPostingErrorMessage(err));
@@ -223,7 +189,7 @@ return (
             <Button
               variant="outline"
               size="sm"
-              onClick={() => void fetchDataSimpananTunai()}
+              onClick={() => void searchTransaksiSimpananTunai()}
               className="rounded-xl border-red-200 bg-white hover:bg-red-50"
             >
               Coba Lagi
@@ -306,7 +272,7 @@ return (
             {/* SEARCH */}
             <div className="space-y-1.5">
               <label className="text-sm font-medium">
-                No. Anggota / Jenis Simpanan
+                No. Karyawan
               </label>
 
               <div className="relative">
@@ -314,12 +280,12 @@ return (
 
                 <input
                   type="text"
-                  placeholder="Cari nomor anggota atau jenis simpanan..."
+                  placeholder="Cari nomor karyawan..."
                   value={nama}
                   onChange={(e) => setNama(e.target.value)}
                   onKeyDown={(e) => {
                     if (e.key === "Enter") {
-                      setSearchTriggered(true);
+                      void searchTransaksiSimpananTunai();
                     }
                   }}
                   className="h-8 w-full rounded-lg border border-input bg-background pl-10 pr-3 text-sm shadow-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/10"
@@ -332,7 +298,7 @@ return (
               <Button
                 type="button"
                 className="h-8 w-full rounded-lg shadow-sm transition-all hover:shadow-md"
-                onClick={() => setSearchTriggered(true)}
+                onClick={() => void searchTransaksiSimpananTunai()}
               >
                 <Send className="mr-2 size-4" />
                 Search
@@ -378,7 +344,7 @@ return (
         <CardContent className="p-0">
           <DataTable
             title=""
-            data={filteredTransaksiData}
+            data={inputSimpananTunaiData}
             columns={columns}
             onCreate={() =>
               router.push(

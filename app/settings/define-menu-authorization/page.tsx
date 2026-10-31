@@ -285,7 +285,6 @@ export default function DefineMenuAuthorizationPage() {
 		setErrorMessage("");
 		try {
 			await groupMenuAuthApi.update(
-				selectedGroupId,
 				flattenMenus(parentMenus).map((menu) => ({
 					groupId: Number(selectedGroupId),
 					menuId: Number(menuKey(menu)),

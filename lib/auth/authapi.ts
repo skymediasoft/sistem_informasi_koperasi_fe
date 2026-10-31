@@ -26,7 +26,7 @@ export const authApi = {
   },
 
 anggotaLogin: async (userlogin: string, password: string) => {
-    const res = await axios.post(`${api_base_url}/anggota-auth/login`, { userlogin, password }, {
+    const res = await axios.post(`${api_base_url}/auth/members/login`, { userlogin, password }, {
       headers: buildHeaders(),
       withCredentials: false,
     });

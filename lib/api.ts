@@ -184,47 +184,44 @@ export type UpdateMenuPayload = {
 };
 
 export const departmentApi = {
-  findAll: () => handleResponse<Department[]>(api.get("/department")),
+  findAll: () => handleResponse<Department[]>(api.get("/departments")),
   findOne: (departmentId: string) =>
-    handleResponse<Department>(api.get(`/department/${departmentId}`)),
+    handleResponse<Department>(api.get(`/departments/${departmentId}`)),
   create: (department: CreateDepartmentPayload) =>
-    handleResponse<Department>(api.post("/department/create", department)),
+    handleResponse<Department>(api.post("/departments", department)),
   update: (departmentId: string, department: UpdateDepartmentPayload) =>
-    handleResponse<{ message: string }>(api.patch(`/department/${departmentId}`, department)),
-  delete: (departmentId: string) => handleResponse<void>(api.delete(`/department/${departmentId}`)),
+    handleResponse<{ message: string }>(api.patch(`/departments/${departmentId}`, department)),
+  delete: (departmentId: string) => handleResponse<void>(api.delete(`/departments/${departmentId}`)),
 };
 
 export const groupApi = {
-  findAll: () => handleResponse<unknown>(api.get("/group")),
+  findAll: () => handleResponse<unknown>(api.get("/groups")),
   create: (group: CreateGroupPayload) =>
-    handleResponse<Group>(api.post("/group", group)),
+    handleResponse<Group>(api.post("/groups", group)),
   update: (groupId: string, group: UpdateGroupPayload) =>
-    handleResponse<{ message: string }>(api.patch(`/group/${groupId}`, group)),
-  delete: (groupId: string) => handleResponse<void>(api.delete(`/group/${groupId}`)),
+    handleResponse<{ message: string }>(api.patch(`/groups/${groupId}`, group)),
+  delete: (groupId: string) => handleResponse<void>(api.delete(`/groups/${groupId}`)),
 };
 
 export const menuApi = {
   findAllParent: () =>
-    handleResponse<ApiMenuNode[]>(api.get("/menu/parent")),
+    handleResponse<ApiMenuNode[]>(api.get("/menus/parents")),
   findAllChild: (parentId: string) =>
-    handleResponse<ApiMenuNode[]>(api.get(`/menu/child/${parentId}`)),
+    handleResponse<ApiMenuNode[]>(api.get(`/menus/${parentId}/children`)),
   create: (menu: CreateMenuPayload) =>
-    handleResponse<ApiMenuNode>(api.post("/menu/create", menu)),
+    handleResponse<ApiMenuNode>(api.post("/menus", menu)),
   update: (menuId: string, menu: UpdateMenuPayload) =>
-    handleResponse<{ message: string }>(api.patch(`/menu/${menuId}`, menu)),
-  delete: (menuId: string) => handleResponse<void>(api.delete(`/menu/${menuId}`)),
-  findOne: (menuId: string) => handleResponse<ApiMenuNode>(api.get(`/menu/${menuId}`)),
+    handleResponse<{ message: string }>(api.patch(`/menus/${menuId}`, menu)),
+  delete: (menuId: string) => handleResponse<void>(api.delete(`/menus/${menuId}`)),
+  findOne: (menuId: string) => handleResponse<ApiMenuNode>(api.get(`/menus/${menuId}`)),
 };  
 
 
 export const groupMenuAuthApi = {
   findAll: (groupId: string) =>
-    handleResponse<unknown>(api.get(`/group/auth/${groupId}`)),
-  update: (
-    groupId: string,
-    menuAuth: { groupId: number; menuId: number; access: number }[],
-  ) =>
-    handleResponse<{ message: string }>(api.patch(`/group/auth/${groupId}`, menuAuth)),
+    handleResponse<unknown>(api.get(`/groups/${groupId}/permissions`)),
+  update: (menuAuth: { groupId: number; menuId: number; access: number }[]) =>
+    handleResponse<{ message: string }>(api.post("/groups/permissions", menuAuth)),
 };
 
 export const userApi = {
@@ -233,7 +230,7 @@ export const userApi = {
     handleResponse<User>(api.post("/auth/register", user)),
   findOne: (userId: string) => handleResponse<User>(api.get(`/auth/users/${userId}`)),
   update: (user: UpdateUserPayload) =>
-    handleResponse<{ message: string }>(api.patch("/auth/users", user)),
+    handleResponse<{ message: string }>(api.patch("/users", user)),
   resetpassword: (userlogin: string, newPassword: string) =>
     handleResponse<{ message: string }>(api.patch("/auth/admin-reset-password", { userlogin, newPassword })),
   delete: (userId: string) => handleResponse<void>(api.delete(`/auth/users/${userId}`)),
@@ -241,11 +238,11 @@ export const userApi = {
 
 
 export const SettingSimpananApi = {
-  findAll: () => handleResponse<SettingSimpanan[]>(api.get("/setting-simpanan")),
+  findAll: () => handleResponse<SettingSimpanan[]>(api.get("/savings-settings")),
   update: (id: number, setting: CreateSimpananPayload) =>
-    handleResponse<unknown>(api.patch(`/setting-simpanan/${id}`, setting)),
+    handleResponse<unknown>(api.patch(`/savings-settings/${id}`, setting)),
   updateApply: (setting: CreateSimpananPayload) =>
-    handleResponse<unknown>(api.post("/setting-simpanan/update-apply", setting)),
+    handleResponse<unknown>(api.post("/savings-settings/apply", setting)),
 };
 
 export type SettingSimpanan = {
@@ -309,16 +306,16 @@ export type AnggotaCreatePayload = {
 };
 
 export const anggotaApi = {
-  findAll: () => handleResponse<AnggotaPayload[]>(api.get("/anggota-auth/all")),
+  findAll: () => handleResponse<AnggotaPayload[]>(api.get("/members")),
 findOne: (NoAnggota: string) =>
   handleResponse<AnggotaPayload>(
-    api.get(`/anggota-auth/${encodeURIComponent(NoAnggota)}`)
+    api.get(`/members/${encodeURIComponent(NoAnggota)}`)
   ),
   create: (anggota: AnggotaCreatePayload) =>
-    handleResponse<AnggotaPayload>(api.post("/anggota-auth/register", anggota)),
+    handleResponse<AnggotaPayload>(api.post("/members", anggota)),
   update: (NoAnggota: string, anggota: AnggotaCreatePayload) =>
-    handleResponse<{ message: string }>(api.patch(`/anggota-auth/update/${encodeURIComponent(NoAnggota)}`, anggota)),
-  delete: (NoAnggota: string) => handleResponse<void>(api.delete(`/anggota-auth/delete/${encodeURIComponent(NoAnggota)}`)),
+    handleResponse<{ message: string }>(api.patch(`/members/${encodeURIComponent(NoAnggota)}`, anggota)),
+  delete: (NoAnggota: string) => handleResponse<void>(api.delete(`/members/${encodeURIComponent(NoAnggota)}`)),
 };
 
 //get 
@@ -349,6 +346,13 @@ export type InputSimpananTunaiPayload = {
   JumlahBulan: number;
 };
 
+export type ViewTransaksiSimpananTunaiParams = {
+  JenisSimpanan: string;
+  DateFrom: string;
+  DateTo: string;
+  NoKaryawan: string;
+};
+
 export const TransaksiSimpananAPI = {
   findAll: () =>
     handleResponse<TransaksiSimpanan[]>(api.get("/transaksi-simpanan")),
@@ -364,30 +368,32 @@ export type SubmitTransaksiSimpananPostingDto = {
 
 export const TransaksiPayrollAPI = {
   findAll: () =>
-    handleResponse<TransaksiSimpanan[]>(api.get("/payroll")),
+    handleResponse<TransaksiSimpanan[]>(api.get("/payroll-postings")),
   history: (tahun: number) =>
     handleResponse<unknown>(
-      api.get(`/payroll/history/${encodeURIComponent(String(tahun))}`),
+      api.get(`/payroll-postings/history/${encodeURIComponent(String(tahun))}`),
     ),
   viewDetail: (idTransaksi: string | number) =>
     handleResponse<unknown>(
       api.get(
-        `/payroll/view-detail/${encodeURIComponent(String(idTransaksi))}`,
+        `/payroll-postings/${encodeURIComponent(String(idTransaksi))}`,
       ),
     ),
   submitPosting: (payload: SubmitTransaksiSimpananPostingDto) =>
-    handleResponse<unknown>(api.post("/payroll/submit-posting", payload)),
+    handleResponse<unknown>(api.post("/payroll-postings", payload)),
 };
 
 export const InputSimpananTunaiAPI = {
   submit: (payload: InputSimpananTunaiPayload) =>
-    handleResponse<unknown>(api.post("/tunai/submit", payload)),
+    handleResponse<unknown>(api.post("/cash-transactions", payload)),
   getById: (idTransaksi: string | number) =>
     handleResponse<unknown>(
-      api.get(`/tunai/${encodeURIComponent(String(idTransaksi))}`),
+      api.get(`/cash-transactions/${encodeURIComponent(String(idTransaksi))}`),
     ),
-  findAll: () =>
-    handleResponse<InputSimpananTunaiPayload[]>(api.get("/inputsimpanantunai")),
+  findAll: (params: ViewTransaksiSimpananTunaiParams) =>
+    handleResponse<InputSimpananTunaiPayload[]>(
+      api.get("/cash-transactions", { params }),
+    ),
 };
 
 
@@ -415,18 +421,18 @@ export type CloseTransaksiPenarikanDto = {
 
 export const penarikanSimpananApi = {
   getdataView: (payload: penarikanSimpananGet) =>
-    handleResponse<unknown>(api.get("/transaksi-penarikan", { params: payload })),
+    handleResponse<unknown>(api.get("/withdrawals", { params: payload })),
 
   getById: (idPengambilan: string | number) =>
     handleResponse<unknown>(
-      api.get(`/transaksi-penarikan/${encodeURIComponent(String(idPengambilan))}`),
+      api.get(`/withdrawals/${encodeURIComponent(String(idPengambilan))}`),
     ),
 
   submit: (payload: SubmitTransaksiPenarikanDto) =>
-    handleResponse<unknown>(api.post("/transaksi-penarikan/submit", payload)),
+    handleResponse<unknown>(api.post("/withdrawals", payload)),
 
   close: (payload: CloseTransaksiPenarikanDto) =>
-    handleResponse<unknown>(api.post("/transaksi-penarikan/close", payload)),
+    handleResponse<unknown>(api.post("/withdrawals/close", payload)),
 };
 
 
@@ -459,31 +465,31 @@ export type CloseTransaksiPenarikanResignDto = {
 
 export const penarikanSimpananResignApi = {
   getdataView: (payload: penarikanSimpananResignGet) =>
-    handleResponse<unknown>(api.get("/transaksi-penarikan/resign", { params: payload })),
+    handleResponse<unknown>(api.get("/withdrawals/resignations", { params: payload })),
 
   getById: (idPengambilan: string | number) =>
     handleResponse<unknown>(
-      api.get(`/transaksi-penarikan/resign/${encodeURIComponent(String(idPengambilan))}`),
+      api.get(`/withdrawals/resignations/${encodeURIComponent(String(idPengambilan))}`),
     ),
 
   submit: (payload: SubmitTransaksiPenarikanResignDto) =>
-    handleResponse<unknown>(api.post("/transaksi-penarikan/resign/submit", payload)),
+    handleResponse<unknown>(api.post("/withdrawals/resignations", payload)),
 
   close: (payload: CloseTransaksiPenarikanResignDto) =>
-    handleResponse<unknown>(api.post("/transaksi-penarikan/resign/close", payload)),
+    handleResponse<unknown>(api.post("/withdrawals/resignations/close", payload)),
 };
 
 
 
 export const penarikanPayrollApi = {
   getdataView: (payload: penarikanSimpananResignGet) =>
-    handleResponse<unknown>(api.get("/transaksi-penarikan/payroll", { params: payload })),
+    handleResponse<unknown>(api.get("/withdrawals/payroll", { params: payload })),
   getDataByTahun: (tahun: number) =>
-    handleResponse<unknown>(api.get(`/transaksi-penarikan/payroll/${tahun}`)),
+    handleResponse<unknown>(api.get(`/withdrawals/payroll/${tahun}`)),
   getViewDetail: (idPengambilan: string | number) =>
     handleResponse<unknown>(
-      api.get(`/transaksi-penarikan/view-detail/${encodeURIComponent(String(idPengambilan))}`),
+      api.get(`/withdrawals/view-detail/${encodeURIComponent(String(idPengambilan))}`),
     ),
     posting: ( Tanggal: Date) =>
-    handleResponse<unknown>(api.post("/transaksi-penarikan/payroll/posting", Tanggal)),
+    handleResponse<unknown>(api.post("/withdrawals/payroll/posting", Tanggal)),
 }
