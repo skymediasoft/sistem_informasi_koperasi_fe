@@ -55,21 +55,31 @@ export default function CreatePenarikanSimpananPage() {
 
   const handleFindEmployee = async (
     noEmployee: string,
+    jenisSimpanan: string,
   ): Promise<EmployeeSavings | null> => {
+    const saldo = await penarikanSimpananApi.getSaldo({
+      NoEmployee: noEmployee,
+      JenisSimpanan: jenisSimpanan,
+    });
+
+    if (saldo.NoAnggota) {
+      return { Nama: saldo.Nama ?? "", Saldo: Number(saldo.Saldo ?? 0) };
+    }
+
+    // Endpoint saldo tidak mengembalikan identitas bila anggota belum punya
+    // mutasi untuk jenis simpanan ini (atau tidak ditemukan / tidak aktif).
+    // Cari namanya di daftar anggota agar tetap terisi dengan saldo 0.
     const anggota = await anggotaApi.findAll();
     const employee = anggota.find(
       (member) =>
         member.NoEmployee.trim().toLowerCase() === noEmployee.toLowerCase(),
     );
     if (!employee) return null;
+    if (employee.StatusAnggota !== "AKTIF") {
+      throw new Error("Anggota tidak aktif.");
+    }
 
-    return {
-      Nama: employee.Nama,
-      Total:
-        Number(employee.SimpananPokok || 0) +
-        Number(employee.SimpananWajib || 0) +
-        Number(employee.SimpananSukarela || 0),
-    };
+    return { Nama: employee.Nama, Saldo: 0 };
   };
 
   const handleSaveAndNew = async (
