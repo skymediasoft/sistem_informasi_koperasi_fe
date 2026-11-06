@@ -17,7 +17,8 @@ export type PenarikanSimpananFormValues = {
 
 export type EmployeeSavings = {
   Nama: string;
-  Total: number;
+  // saldo ledger untuk jenis simpanan yang dipilih (GET /withdrawals/balance)
+  Saldo: number;
 };
 
 type PenarikanSimpananFormProps = {
@@ -27,7 +28,10 @@ type PenarikanSimpananFormProps = {
   onSaveAndNew?: (
     payload: SubmitTransaksiPenarikanDto,
   ) => Promise<boolean>;
-  onFindEmployee?: (noEmployee: string) => Promise<EmployeeSavings | null>;
+  onFindEmployee?: (
+    noEmployee: string,
+    jenisSimpanan: string,
+  ) => Promise<EmployeeSavings | null>;
   onCancel: () => void;
 };
 
@@ -65,6 +69,7 @@ export function PenarikanSimpananForm({
 }: PenarikanSimpananFormProps) {
   const [values, setValues] = useState(initialValues);
   const formRef = useRef<HTMLFormElement>(null);
+  const lookupId = useRef(0);
   const [employee, setEmployee] = useState<EmployeeSavings | null>(null);
   const [lookupError, setLookupError] = useState("");
   const [lookingUpEmployee, setLookingUpEmployee] = useState(false);
@@ -73,28 +78,47 @@ export function PenarikanSimpananForm({
   const updateValue = (name: keyof PenarikanSimpananFormValues, value: string) =>
     setValues((current) => ({ ...current, [name]: value }));
 
+  // Membatalkan hasil lookup yang masih berjalan: respons untuk No. Employee /
+  // Jenis Simpanan lama tidak boleh menimpa data input yang sudah berubah.
+  const invalidateLookup = () => {
+    lookupId.current += 1;
+    setEmployee(null);
+    setLookupError("");
+    setLookingUpEmployee(false);
+  };
+
   const lookupEmployee = async () => {
     const noEmployee = values.NoEmployee.trim();
+    const jenisSimpanan = values.JenisSimpanan.trim();
     if (!onFindEmployee || !noEmployee || lookingUpEmployee) return;
 
+    if (!jenisSimpanan) {
+      setEmployee(null);
+      setLookupError("Pilih Jenis Simpanan terlebih dahulu.");
+      return;
+    }
+
+    const id = ++lookupId.current;
     setLookingUpEmployee(true);
     setLookupError("");
     setEmployee(null);
     try {
-      const result = await onFindEmployee(noEmployee);
+      const result = await onFindEmployee(noEmployee, jenisSimpanan);
+      if (id !== lookupId.current) return;
       if (!result) {
         setLookupError("Data karyawan tidak ditemukan.");
         return;
       }
       setEmployee(result);
     } catch (error) {
+      if (id !== lookupId.current) return;
       setLookupError(
         error instanceof Error
           ? error.message
           : "Gagal memuat data karyawan.",
       );
     } finally {
-      setLookingUpEmployee(false);
+      if (id === lookupId.current) setLookingUpEmployee(false);
     }
   };
 
@@ -116,12 +140,12 @@ export function PenarikanSimpananForm({
     }
     if (onFindEmployee && !employee) {
       setLookupError(
-        "Masukkan No. Employee lalu klik Cek Data atau tekan Enter.",
+        "Pilih Jenis Simpanan dan masukkan No. Employee, lalu klik Cek Data atau tekan Enter.",
       );
       return null;
     }
-    if (employee && jumlah > employee.Total) {
-      setLookupError("Jumlah penarikan melebihi total simpanan anggota.");
+    if (employee && jumlah > employee.Saldo) {
+      setLookupError("Jumlah penarikan melebihi saldo simpanan anggota.");
       return null;
     }
 
@@ -156,8 +180,7 @@ export function PenarikanSimpananForm({
           JenisSimpanan: "",
           Jumlah: "",
         });
-        setEmployee(null);
-        setLookupError("");
+        invalidateLookup();
       }
     } finally {
       setSavingAndNew(false);
@@ -199,9 +222,11 @@ export function PenarikanSimpananForm({
              <select
              required
                   value={values.JenisSimpanan}
-                  onChange={(event) =>
-                updateValue("JenisSimpanan", event.target.value)
-              }
+                  onChange={(event) => {
+                    updateValue("JenisSimpanan", event.target.value);
+                    // saldo bergantung pada jenis simpanan, jadi hasil lama tidak berlaku
+                    invalidateLookup();
+                  }}
                   className="h-9 w-full rounded-lg border border-input bg-background px-3 text-sm font-normal shadow-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
                 >
                   <option value="" disabled>
@@ -221,8 +246,7 @@ export function PenarikanSimpananForm({
                 value={values.NoEmployee}
                 onChange={(event) => {
                   updateValue("NoEmployee", event.target.value);
-                  setEmployee(null);
-                  setLookupError("");
+                  invalidateLookup();
                 }}
                 onKeyDown={(event) => {
                   if (event.key === "Enter" && onFindEmployee) {
@@ -237,7 +261,11 @@ export function PenarikanSimpananForm({
                   type="button"
                   variant="outline"
                   onClick={() => void lookupEmployee()}
-                  disabled={!values.NoEmployee.trim() || lookingUpEmployee}
+                  disabled={
+                    !values.NoEmployee.trim() ||
+                    !values.JenisSimpanan.trim() ||
+                    lookingUpEmployee
+                  }
                 >
                   {lookingUpEmployee ? "Memuat..." : "Cek Data"}
                 </Button>
@@ -252,10 +280,16 @@ export function PenarikanSimpananForm({
               className={`${inputClassName} bg-muted`}
             />
           </FormField>
-          <FormField label="Total Simpanan">
+          <FormField
+            label={
+              values.JenisSimpanan
+                ? `Saldo ${values.JenisSimpanan}`
+                : "Saldo Simpanan"
+            }
+          >
             <input
               type="text"
-              value={employee ? formatRupiah(employee.Total) : ""}
+              value={employee ? formatRupiah(employee.Saldo) : ""}
               readOnly
               className={`${inputClassName} bg-muted`}
             />
@@ -291,7 +325,7 @@ export function PenarikanSimpananForm({
                   ? "Memuat data karyawan..."
                   : employee
                     ? "Data karyawan berhasil dimuat."
-                    : "Klik Cek Data atau tekan Enter untuk memuat data.")}
+                    : "Pilih Jenis Simpanan, isi No. Employee, lalu klik Cek Data atau tekan Enter.")}
             </div>
           ) : null}
           <div className="flex justify-end gap-3 md:col-span-2">

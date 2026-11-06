@@ -419,9 +419,28 @@ export type CloseTransaksiPenarikanDto = {
   NoRef: string;
 };
 
+export type SaldoPenarikanParams = {
+  NoEmployee: string;
+  JenisSimpanan: string;
+};
+
+export type SaldoPenarikan = {
+  NoEmployee: string;
+  // null bila backend tidak menemukan mutasi untuk anggota/jenis simpanan tsb
+  NoAnggota: string | null;
+  Nama: string | null;
+  JenisSimpanan: string;
+  Saldo: number;
+};
+
 export const penarikanSimpananApi = {
   getdataView: (payload: penarikanSimpananGet) =>
     handleResponse<unknown>(api.get("/withdrawals", { params: payload })),
+
+  getSaldo: (params: SaldoPenarikanParams) =>
+    handleResponse<SaldoPenarikan>(
+      api.get("/withdrawals/balance", { params }),
+    ),
 
   getById: (idPengambilan: string | number) =>
     handleResponse<unknown>(
