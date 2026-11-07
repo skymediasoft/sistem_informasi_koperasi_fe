@@ -400,15 +400,15 @@ export const InputSimpananTunaiAPI = {
 
 export type penarikanSimpananGet = {
   Status: string;
-  DateFrom?: Date;
-  DateTo?: Date;
+  DateFrom?: Date | string;
+  DateTo?: Date | string;
   NoKaryawan?: string;
 };
-  
+
 export type SubmitTransaksiPenarikanDto = {
   IDPengambilan: number;
   IDTransaksiSimpanan: number;
-  Tanggal: Date;
+  Tanggal: string; // yyyy-mm-dd
   NoEmployee: string;
   JenisSimpanan: string;
   Jumlah: number;

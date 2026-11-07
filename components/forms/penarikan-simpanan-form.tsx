@@ -152,7 +152,7 @@ export function PenarikanSimpananForm({
     return {
       IDPengambilan: Number(values.IDPengambilan || 0),
       IDTransaksiSimpanan: Number(values.IDTransaksiSimpanan || 0),
-      Tanggal: tanggal,
+      Tanggal: values.Tanggal, // plain yyyy-mm-dd: a Date shifts a day across timezones
       NoEmployee: values.NoEmployee.trim(),
       JenisSimpanan: values.JenisSimpanan.trim(),
       Jumlah: jumlah,

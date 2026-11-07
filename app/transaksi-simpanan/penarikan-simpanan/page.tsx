@@ -37,7 +37,7 @@ const todayLocal = (offsetDays = 0) => {
 export default function PenarikanSimpananPage() {
   const { logout, user } = useAuth();
   const [status, setStatus] = useState("Open");
-  const [dateFrom, setDateFrom] = useState(() => todayLocal(-1)); // H-1: same-day range returns nothing
+  const [dateFrom, setDateFrom] = useState(() => todayLocal());
   const [dateTo, setDateTo] = useState(() => todayLocal());
   const [noKaryawan, setNoKaryawan] = useState("");
   const [data, setData] = useState<PenarikanSimpananRow[]>([]);
@@ -107,8 +107,9 @@ export default function PenarikanSimpananPage() {
 
     // Empty filters are omitted so the backend DTO defaults apply
     const payload: penarikanSimpananGet = { Status: status.trim() };
-    if (dateFrom) payload.DateFrom = new Date(`${dateFrom}T00:00:00`);
-    if (dateTo) payload.DateTo = new Date(`${dateTo}T23:59:59.999`);
+    // plain yyyy-mm-dd: the SP compares DATE columns, no time/timezone needed
+    if (dateFrom) payload.DateFrom = dateFrom;
+    if (dateTo) payload.DateTo = dateTo;
     if (noKaryawan.trim()) payload.NoKaryawan = noKaryawan.trim();
 
     setLoading(true);
