@@ -311,7 +311,8 @@ findOne: (NoAnggota: string) =>
   handleResponse<AnggotaPayload>(
     api.get(`/members/${encodeURIComponent(NoAnggota)}`)
   ),
-  create: (anggota: AnggotaCreatePayload) =>
+  // StatusAnggota is not accepted on create (the DB procedure sets 'BELUM AKTIF')
+  create: ({ StatusAnggota: _status, ...anggota }: AnggotaCreatePayload) =>
     handleResponse<AnggotaPayload>(api.post("/members", anggota)),
   update: (NoAnggota: string, anggota: AnggotaCreatePayload) =>
     handleResponse<{ message: string }>(api.patch(`/members/${encodeURIComponent(NoAnggota)}`, anggota)),
@@ -399,9 +400,9 @@ export const InputSimpananTunaiAPI = {
 
 export type penarikanSimpananGet = {
   Status: string;
-  DateFrom: Date;
-  DateTo: Date;
-  NoKaryawan: string;
+  DateFrom?: Date;
+  DateTo?: Date;
+  NoKaryawan?: string;
 };
   
 export type SubmitTransaksiPenarikanDto = {

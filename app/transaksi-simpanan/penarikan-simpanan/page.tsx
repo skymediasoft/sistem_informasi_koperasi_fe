@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { CalendarDays, Search, Edit, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -92,20 +92,17 @@ export default function PenarikanSimpananPage() {
     router.push(`${listPath}/close/${encodeURIComponent(id)}`);
   };
 
-  const handleSearch = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
-    if (dateFrom > dateTo) {
+  const loadData = async () => {
+    if (dateFrom && dateTo && dateFrom > dateTo) {
       setError("Tanggal dari tidak boleh lebih besar dari tanggal sampai.");
       return;
     }
 
-    const payload: penarikanSimpananGet = {
-      Status: status.trim(),
-      DateFrom: new Date(`${dateFrom}T00:00:00`),
-      DateTo: new Date(`${dateTo}T23:59:59.999`),
-      NoKaryawan: noKaryawan.trim(),
-    };
+    // Empty filters are omitted so the backend DTO defaults apply
+    const payload: penarikanSimpananGet = { Status: status.trim() };
+    if (dateFrom) payload.DateFrom = new Date(`${dateFrom}T00:00:00`);
+    if (dateTo) payload.DateTo = new Date(`${dateTo}T23:59:59.999`);
+    if (noKaryawan.trim()) payload.NoKaryawan = noKaryawan.trim();
 
     setLoading(true);
     setError(null);
@@ -136,6 +133,16 @@ export default function PenarikanSimpananPage() {
       setLoading(false);
     }
   };
+
+  const handleSearch = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    void loadData();
+  };
+
+  useEffect(() => {
+    void loadData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   if (!user) return null;
 
@@ -189,7 +196,6 @@ export default function PenarikanSimpananPage() {
                   <CalendarDays className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
                   <input
                     type="date"
-                    required
                     value={dateFrom}
                     onChange={(event) => setDateFrom(event.target.value)}
                     className="h-9 w-full rounded-lg border border-input bg-background pl-10 pr-3 text-sm font-normal shadow-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
@@ -203,7 +209,6 @@ export default function PenarikanSimpananPage() {
                   <CalendarDays className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
                   <input
                     type="date"
-                    required
                     value={dateTo}
                     onChange={(event) => setDateTo(event.target.value)}
                     className="h-9 w-full rounded-lg border border-input bg-background pl-10 pr-3 text-sm font-normal shadow-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
@@ -215,7 +220,6 @@ export default function PenarikanSimpananPage() {
                 No. Karyawan
                 <input
                   type="text"
-                  required
                   value={noKaryawan}
                   onChange={(event) => setNoKaryawan(event.target.value)}
                   placeholder="Masukkan nomor karyawan"
@@ -268,9 +272,7 @@ export default function PenarikanSimpananPage() {
           emptyMessage={
             loading
               ? "Memuat data penarikan simpanan..."
-              : hasSearched
-                ? "Data penarikan simpanan tidak ditemukan."
-                : "Isi filter di atas untuk menampilkan data penarikan simpanan."
+              : "Data penarikan simpanan tidak ditemukan."
           }
         />
       </div>
