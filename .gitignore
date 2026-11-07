@@ -21,3 +21,6 @@ public/sw.js.map
 public/swe-worker-*.js
 public/swe-worker-*.js.map
 pnpm-lock.yaml
+
+CLAUDE.md
+AGENTS.md

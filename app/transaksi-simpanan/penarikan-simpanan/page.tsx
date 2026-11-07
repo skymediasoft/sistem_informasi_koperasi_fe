@@ -27,11 +27,18 @@ const formatCellValue = (value: unknown) => {
   return String(value);
 };
 
+// yyyy-mm-dd in local time (toISOString would shift to UTC)
+const todayLocal = (offsetDays = 0) => {
+  const d = new Date();
+  d.setDate(d.getDate() + offsetDays);
+  return d.toLocaleDateString("en-CA");
+};
+
 export default function PenarikanSimpananPage() {
   const { logout, user } = useAuth();
   const [status, setStatus] = useState("Open");
-  const [dateFrom, setDateFrom] = useState("");
-  const [dateTo, setDateTo] = useState("");
+  const [dateFrom, setDateFrom] = useState(() => todayLocal(-1)); // H-1: same-day range returns nothing
+  const [dateTo, setDateTo] = useState(() => todayLocal());
   const [noKaryawan, setNoKaryawan] = useState("");
   const [data, setData] = useState<PenarikanSimpananRow[]>([]);
   const [loading, setLoading] = useState(false);
