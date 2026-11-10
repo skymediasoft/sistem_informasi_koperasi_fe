@@ -7,9 +7,10 @@ import { DashboardShell } from "@/components/dashboard/app-shell";
 import {
   PenarikanSimpananForm,
   type PenarikanSimpananFormValues,
+  type EmployeeSavings,
 } from "@/components/forms/penarikan-simpanan-form";
 import { showAlert } from "@/lib/alert";
-import { penarikanSimpananApi } from "@/lib/api";
+import { anggotaApi, penarikanSimpananApi } from "@/lib/api";
 import { useAuth } from "@/lib/auth/auth-context";
 import { getMenuByRole } from "@/lib/auth/navigation";
 
@@ -56,10 +57,11 @@ export default function EditPenarikanSimpananPage() {
     setError(null);
     try {
       const response = await penarikanSimpananApi.getById(idPengambilan);
-      if (!isRecord(response)) {
+      const record = Array.isArray(response) ? response[0] : response;
+      if (!isRecord(record)) {
         throw new Error("Detail transaksi penarikan tidak ditemukan atau tidak valid.");
       }
-      setInitialValues(toFormValues(response, idPengambilan));
+      setInitialValues(toFormValues(record, idPengambilan));
     } catch (requestError) {
       setError(
         requestError instanceof Error
@@ -95,6 +97,32 @@ export default function EditPenarikanSimpananPage() {
     }
   };
 
+  const handleFindEmployee = async (
+    noEmployee: string,
+    jenisSimpanan: string,
+  ): Promise<EmployeeSavings | null> => {
+    const saldo = await penarikanSimpananApi.getSaldo({
+      NoEmployee: noEmployee,
+      JenisSimpanan: jenisSimpanan,
+    });
+
+    if (saldo.NoAnggota) {
+      return { Nama: saldo.Nama ?? "", Saldo: Number(saldo.Saldo ?? 0) };
+    }
+
+    const anggota = await anggotaApi.findAll();
+    const employee = anggota.find(
+      (member) =>
+        member.NoEmployee.trim().toLowerCase() === noEmployee.toLowerCase(),
+    );
+    if (!employee) return null;
+    if (employee.StatusAnggota !== "AKTIF") {
+      throw new Error("Anggota tidak aktif.");
+    }
+
+    return { Nama: employee.Nama, Saldo: 0 };
+  };
+
   if (!user) return null;
 
   return (
@@ -127,6 +155,7 @@ export default function EditPenarikanSimpananPage() {
             initialValues={initialValues}
             submitting={submitting}
             onSubmit={handleSubmit}
+            onFindEmployee={handleFindEmployee}
             onCancel={() => router.push(listPath)}
           />
         ) : null}

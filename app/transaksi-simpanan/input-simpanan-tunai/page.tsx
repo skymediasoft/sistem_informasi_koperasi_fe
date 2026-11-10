@@ -312,14 +312,14 @@ return (
       <Card className="overflow-hidden rounded-2xl border shadow-sm">
 
         {/* TABLE HEADER */}
-        <div className="flex flex-col gap-3 border-b bg-gradient-to-r from-primary/[0.04] via-background to-background px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
+        <div className="flex flex-col gap-3 border-b bg-gradient-to-r from-primary/[0.04] via-background to-background px-5 sm:flex-row sm:items-center sm:justify-between">
+          {/* <div>
             <div className="flex items-center gap-3">
               <div className="flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                <Wallet className="size-5" />
-              </div>
+                <Wallet className="size-5" /> */}
+              {/* </div>  */}
 
-              <div>
+              {/* <div>
                 <h3 className="text-base font-semibold tracking-tight">
                   Transaksi Simpanan Tunai
                 </h3>
@@ -327,9 +327,9 @@ return (
                 <p className="text-sm text-muted-foreground">
                   Daftar transaksi simpanan tunai anggota
                 </p>
-              </div>
-            </div>
-          </div>
+              </div> */}
+            {/* </div>
+          </div> */}
 
           {/* LOADING INDICATOR */}
           {loading && (

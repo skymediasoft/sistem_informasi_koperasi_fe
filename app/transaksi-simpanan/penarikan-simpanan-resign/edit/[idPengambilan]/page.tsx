@@ -7,9 +7,10 @@ import { DashboardShell } from "@/components/dashboard/app-shell";
 import {
   PenarikanSimpananResignForm,
   type PenarikanSimpananResignFormValues,
+  type EmployeeSavings,
 } from "@/components/forms/penarikan-simpanan-resign-form";
 import { showAlert } from "@/lib/alert";
-import { penarikanSimpananResignApi } from "@/lib/api";
+import { anggotaApi, penarikanSimpananResignApi } from "@/lib/api";
 import { useAuth } from "@/lib/auth/auth-context";
 import { getMenuByRole } from "@/lib/auth/navigation";
 
@@ -56,10 +57,11 @@ export default function EditPenarikanSimpananPage() {
     setError(null);
     try {
       const response = await penarikanSimpananResignApi.getById(idPengambilan);
-      if (!isRecord(response)) {
+      const record = Array.isArray(response) ? response[0] : response;
+      if (!isRecord(record)) {
         throw new Error("Detail transaksi penarikan simpanan resign tidak ditemukan atau tidak valid.");
       }
-      setInitialValues(toFormValues(response, idPengambilan));
+      setInitialValues(toFormValues(record, idPengambilan));
     } catch (requestError) {
       setError(
         requestError instanceof Error
@@ -95,6 +97,24 @@ export default function EditPenarikanSimpananPage() {
     }
   };
 
+  const handleFindEmployee = async (
+    noEmployee: string,
+  ): Promise<EmployeeSavings | null> => {
+    const members = await anggotaApi.findAll();
+    const employee = members.find(
+      (member) =>
+        member.NoEmployee.trim().toLowerCase() === noEmployee.toLowerCase(),
+    );
+    if (!employee) return null;
+
+    return {
+      Nama: employee.Nama,
+      SimpananPokok: Number(employee.SimpananPokok || 0),
+      SimpananWajib: Number(employee.SimpananWajib || 0),
+      SimpananSukarela: Number(employee.SimpananSukarela || 0),
+    };
+  };
+
   if (!user) return null;
 
   return (
@@ -127,6 +147,7 @@ export default function EditPenarikanSimpananPage() {
             initialValues={initialValues}
             submitting={submitting}
             onSubmit={handleSubmit}
+            onFindEmployee={handleFindEmployee}
             onCancel={() => router.push(listPath)}
           />
         ) : null}

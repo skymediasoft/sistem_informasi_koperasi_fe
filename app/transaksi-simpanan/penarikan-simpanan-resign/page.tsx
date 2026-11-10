@@ -1,5 +1,6 @@
 "use client";
 
+import { isAxiosError } from "axios";
 import { useMemo, useState } from "react";
 import { CalendarDays, Search, Edit, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -21,18 +22,101 @@ type PenarikanSimpananRow = Record<string, unknown>;
 const isRecord = (value: unknown): value is PenarikanSimpananRow =>
   typeof value === "object" && value !== null && !Array.isArray(value);
 
-const formatCellValue = (value: unknown) => {
+const dateColumns = new Set(["Tanggal", "CreatedDate", "TanggalTransfer"]);
+const currencyColumns = new Set([
+  "Jumlah",
+  "SimpananPokok",
+  "SimpananWajib",
+  "SimpananSukarela",
+  "Total",
+]);
+
+const todayLocal = () => {
+  const now = new Date();
+  const localDate = new Date(now.getTime() - now.getTimezoneOffset() * 60_000);
+  return localDate.toISOString().slice(0, 10);
+};
+
+const formatCellValue = (key: string, value: unknown) => {
   if (value === null || value === undefined || value === "") return "-";
+
+  if (dateColumns.has(key)) {
+    let date: Date;
+    if (value instanceof Date) {
+      date = value;
+    } else if (typeof value === "string") {
+      const dateValue = /^\d{4}-\d{2}-\d{2}/.test(value)
+        ? `${value.slice(0, 10)}T00:00:00Z`
+        : value;
+      date = new Date(dateValue);
+    } else if (typeof value === "number") {
+      date = new Date(value);
+    } else {
+      return "-";
+    }
+
+    if (!Number.isFinite(date.getTime())) return "-";
+    return new Intl.DateTimeFormat("id-ID", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      timeZone: "UTC",
+    }).format(date);
+  }
+
+  if (currencyColumns.has(key)) {
+    const amount = Number(value);
+    return Number.isFinite(amount)
+      ? `Rp.${new Intl.NumberFormat("id-ID", {
+          maximumFractionDigits: 0,
+        }).format(amount)}`
+      : "-";
+  }
+
   if (typeof value === "object") return JSON.stringify(value);
   return String(value);
+};
+
+const getRequestErrorMessage = (error: unknown) => {
+  if (!isAxiosError(error)) {
+    return error instanceof Error
+      ? error.message
+      : "Gagal memuat data penarikan simpanan resign.";
+  }
+
+  const status = error.response?.status;
+  const body: unknown = error.response?.data;
+  console.error("Gagal memuat daftar penarikan simpanan resign:", {
+    status,
+    body,
+  });
+
+  let detail = "";
+  if (typeof body === "string") {
+    detail = body;
+  } else if (isRecord(body)) {
+    const message = body.message ?? body.error ?? body.p_Message;
+    if (typeof message === "string") {
+      detail = message;
+    } else if (Array.isArray(message)) {
+      detail = message.map(String).join(" ");
+    } else {
+      detail = JSON.stringify(body, (key, value: unknown) =>
+        key === "stack" ? undefined : value,
+      );
+    }
+  }
+
+  const statusMessage = status ? `HTTP ${status}` : "Request gagal";
+  return detail ? `${statusMessage}: ${detail}` : `${statusMessage}: ${error.message}`;
 };
 
 export default function PenarikanSimpananResignPage() {
   const { logout, user } = useAuth();
   const [status, setStatus] = useState("Open");
-  const [dateFrom, setDateFrom] = useState("");
-  const [dateTo, setDateTo] = useState("");
-  const [noKaryawan, setNoKaryawan] = useState("");
+  const [dateFrom, setDateFrom] = useState(() => todayLocal());
+  const [dateTo, setDateTo] = useState(() => todayLocal());
+  const [noKaryawan, setNoKaryawan] = useState("%");
   const [data, setData] = useState<PenarikanSimpananRow[]>([]);
   const [loading, setLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
@@ -68,7 +152,7 @@ export default function PenarikanSimpananResignPage() {
       Object.keys(data[0] ?? {}).map((key) => ({
         key,
         header: key,
-        accessor: (row: PenarikanSimpananRow) => formatCellValue(row[key]),
+        accessor: (row: PenarikanSimpananRow) => formatCellValue(key, row[key]),
       })),
     [data],
   );
@@ -95,16 +179,19 @@ export default function PenarikanSimpananResignPage() {
   const handleSearch = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (dateFrom > dateTo) {
+    if (dateFrom && dateTo && dateFrom > dateTo) {
       setError("Tanggal dari tidak boleh lebih besar dari tanggal sampai.");
       return;
     }
 
+    const defaultDate = todayLocal();
+    const effectiveDateFrom = dateFrom || defaultDate;
+    const effectiveDateTo = dateTo || defaultDate;
     const payload: penarikanSimpananResignGet = {
       Status: status.trim(),
-      DateFrom: new Date(`${dateFrom}T00:00:00`),
-      DateTo: new Date(`${dateTo}T23:59:59.999`),
-      NoKaryawan: noKaryawan.trim(),
+      DateFrom: new Date(`${effectiveDateFrom}T00:00:00`),
+      DateTo: new Date(`${effectiveDateTo}T23:59:59.999`),
+      NoKaryawan: noKaryawan.trim() || "%",
     };
 
     setLoading(true);
@@ -127,11 +214,7 @@ export default function PenarikanSimpananResignPage() {
 
       setData(rows);
     } catch (requestError) {
-      setError(
-        requestError instanceof Error
-          ? requestError.message
-          : "Gagal memuat data penarikan simpanan.",
-      );
+      setError(getRequestErrorMessage(requestError));
     } finally {
       setLoading(false);
     }
@@ -189,7 +272,6 @@ export default function PenarikanSimpananResignPage() {
                   <CalendarDays className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
                   <input
                     type="date"
-                    required
                     value={dateFrom}
                     onChange={(event) => setDateFrom(event.target.value)}
                     className="h-9 w-full rounded-lg border border-input bg-background pl-10 pr-3 text-sm font-normal shadow-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
@@ -203,7 +285,6 @@ export default function PenarikanSimpananResignPage() {
                   <CalendarDays className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
                   <input
                     type="date"
-                    required
                     value={dateTo}
                     onChange={(event) => setDateTo(event.target.value)}
                     className="h-9 w-full rounded-lg border border-input bg-background pl-10 pr-3 text-sm font-normal shadow-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
@@ -215,7 +296,6 @@ export default function PenarikanSimpananResignPage() {
                 No. Karyawan
                 <input
                   type="text"
-                  required
                   value={noKaryawan}
                   onChange={(event) => setNoKaryawan(event.target.value)}
                   placeholder="Masukkan nomor karyawan"

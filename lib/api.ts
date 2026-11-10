@@ -400,8 +400,8 @@ export const InputSimpananTunaiAPI = {
 
 export type penarikanSimpananGet = {
   Status: string;
-  DateFrom?: Date | string;
-  DateTo?: Date | string;
+  DateFrom?: Date;
+  DateTo?: Date;
   NoKaryawan?: string;
 };
 

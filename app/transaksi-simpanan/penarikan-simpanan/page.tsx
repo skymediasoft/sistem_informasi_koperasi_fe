@@ -21,8 +21,45 @@ type PenarikanSimpananRow = Record<string, unknown>;
 const isRecord = (value: unknown): value is PenarikanSimpananRow =>
   typeof value === "object" && value !== null && !Array.isArray(value);
 
-const formatCellValue = (value: unknown) => {
+const dateColumns = new Set(["Tanggal", "CreatedDate", "TanggalTransfer"]);
+const currencyColumns = new Set(["Jumlah"]);
+
+const formatCellValue = (key: string, value: unknown) => {
   if (value === null || value === undefined || value === "") return "-";
+
+  if (dateColumns.has(key)) {
+    let date: Date;
+    if (value instanceof Date) {
+      date = value;
+    } else if (typeof value === "string") {
+      const dateValue = /^\d{4}-\d{2}-\d{2}/.test(value)
+        ? `${value.slice(0, 10)}T00:00:00Z`
+        : value;
+      date = new Date(dateValue);
+    } else if (typeof value === "number") {
+      date = new Date(value);
+    } else {
+      return "-";
+    }
+
+    if (!Number.isFinite(date.getTime())) return "-";
+    return new Intl.DateTimeFormat("id-ID", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      timeZone: "UTC",
+    }).format(date);
+  }
+
+  if (currencyColumns.has(key)) {
+    const amount = Number(value);
+    return Number.isFinite(amount)
+      ? `Rp.${new Intl.NumberFormat("id-ID", {
+          maximumFractionDigits: 0,
+        }).format(amount)}`
+      : "-";
+  }
+
   if (typeof value === "object") return JSON.stringify(value);
   return String(value);
 };
@@ -39,7 +76,7 @@ export default function PenarikanSimpananPage() {
   const [status, setStatus] = useState("Open");
   const [dateFrom, setDateFrom] = useState(() => todayLocal());
   const [dateTo, setDateTo] = useState(() => todayLocal());
-  const [noKaryawan, setNoKaryawan] = useState("");
+  const [noKaryawan, setNoKaryawan] = useState("%");
   const [data, setData] = useState<PenarikanSimpananRow[]>([]);
   const [loading, setLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
@@ -75,7 +112,7 @@ export default function PenarikanSimpananPage() {
       Object.keys(data[0] ?? {}).map((key) => ({
         key,
         header: key,
-        accessor: (row: PenarikanSimpananRow) => formatCellValue(row[key]),
+        accessor: (row: PenarikanSimpananRow) => formatCellValue(key, row[key]),
       })),
     [data],
   );
@@ -105,12 +142,12 @@ export default function PenarikanSimpananPage() {
       return;
     }
 
-    // Empty filters are omitted so the backend DTO defaults apply
-    const payload: penarikanSimpananGet = { Status: status.trim() };
-    // plain yyyy-mm-dd: the SP compares DATE columns, no time/timezone needed
-    if (dateFrom) payload.DateFrom = dateFrom;
-    if (dateTo) payload.DateTo = dateTo;
-    if (noKaryawan.trim()) payload.NoKaryawan = noKaryawan.trim();
+    const payload: penarikanSimpananGet = {
+      Status: status.trim(),
+      NoKaryawan: noKaryawan.trim() || "%",
+    };
+    if (dateFrom) payload.DateFrom = new Date(`${dateFrom}T00:00:00`);
+    if (dateTo) payload.DateTo = new Date(`${dateTo}T23:59:59.999`);
 
     setLoading(true);
     setError(null);
@@ -191,8 +228,8 @@ export default function PenarikanSimpananPage() {
                   className="h-9 w-full rounded-lg border border-input bg-background px-3 text-sm font-normal shadow-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
                 >
                   <option value="" disabled>
-                  Semua Status
-                </option>
+                    Semua Status
+                  </option>
                   <option value="Open">Open</option>
                   <option value="Close">Close</option>
                 </select>
