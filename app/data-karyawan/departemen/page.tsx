@@ -11,14 +11,15 @@ import { getMenuByRole } from "@/lib/auth/navigation";
 import { showAlert, showConfirm } from "@/lib/alert";
 import { departmentApi, type Department } from "@/lib/api";
 
+
 type DepartemenRow = {
   Deptid: string;
   Departemen: string;
-  createdUser: string;
-  createdDate: number;
+  PostBy: string;
+  PostDate: string | number;
 };
 
-const formatTanggal = (timestamp: number) =>
+const formatTanggal = (timestamp: string | number) =>
   timestamp
     ? new Intl.DateTimeFormat("id-ID", {
         day: "numeric",
@@ -51,10 +52,8 @@ export default function DepartemenPage() {
         departments.map((department: Department) => ({
           Deptid: department.departmentId,
           Departemen: department.departmentName,
-          createdUser: department.departmentCreatedUser,
-          createdDate: department.departmentCreateDate
-            ? new Date(department.departmentCreateDate).getTime()
-            : 0,
+          PostBy: department.PostBy,
+          PostDate: department.PostDate,
         })),
       );
     } catch (requestError) {
@@ -80,8 +79,8 @@ export default function DepartemenPage() {
     () => [
       { key: "Deptid", header: "Dept ID", className: "w-24", accessor: (row: DepartemenRow) => row.Deptid },
       { key: "Departemen", header: "Nama Department", accessor: (row: DepartemenRow) => row.Departemen },
-      { key: "PostBy", header: "Post By", accessor: (row: DepartemenRow) => row.createdUser },
-      { key: "PostDate", header: "Post Date", accessor: (row: DepartemenRow) => formatTanggal(row.createdDate) },
+      { key: "PostBy", header: "Post By", accessor: (row: DepartemenRow) => row.PostBy },
+      { key: "PostDate", header: "Post Date", accessor: (row: DepartemenRow) => formatTanggal(row.PostDate) },
     ],
     [],
   );

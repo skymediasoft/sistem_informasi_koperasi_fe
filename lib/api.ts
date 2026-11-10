@@ -103,8 +103,8 @@ export const handleResponse = async <T>(promise: Promise<any>): Promise<T> => {
 export type Department = {
   departmentId: string;
   departmentName: string;
-  departmentCreatedUser: string;
-  departmentCreateDate?: string | number;
+  PostBy: string;
+  PostDate: string | number;
 };
 
 export type Group = {
